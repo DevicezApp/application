@@ -21,18 +21,13 @@ public class ServerStreamHandler extends AbstractStreamHandler {
             return;
         }
 
-        handlePacket((AbstractPacket) message);
+        server.handlePacket(getSession(), (AbstractPacket) message);
     }
 
     @Override
     public void event(final SessionEvent event) {
-        switch (event) {
-            case OPENED -> server.addClient(getSession());
-            case CLOSED -> server.removeClient(getSession().getId());
+        if (event == SessionEvent.CLOSED) {
+            server.removeClient(getSession().getId());
         }
-    }
-
-    private void handlePacket(final AbstractPacket packet) {
-
     }
 }

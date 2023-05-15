@@ -1,5 +1,9 @@
 package de.devicez.server.networking;
 
+import de.devicez.common.packet.AbstractPacket;
+import de.devicez.common.packet.client.LoginPacket;
+import de.devicez.server.networking.packet.AbstractPacketHandler;
+import de.devicez.server.networking.packet.LoginPacketHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.snf4j.core.SelectorLoop;
 import org.snf4j.core.factory.AbstractSessionFactory;
@@ -10,14 +14,24 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class NetworkingServer {
 
+    private final Map<Class<? extends AbstractPacket>, AbstractPacketHandler<?>> packetHandlerMap = new HashMap<>();
+    private final Map<Long, Client> clientMap = new HashMap<>();
+
     private SelectorLoop loop;
 
     public NetworkingServer(final int port) {
+        registerPacketHandler();
         new Thread(() -> start(port)).start();
+    }
+
+    private void registerPacketHandler() {
+        packetHandlerMap.put(LoginPacket.class, new LoginPacketHandler(this));
     }
 
     private void start(final int port) {
@@ -49,12 +63,26 @@ public class NetworkingServer {
         loop.stop();
     }
 
-    void addClient(final IStreamSession session) {
+    <T extends AbstractPacket> void handlePacket(final IStreamSession session, final T packet) {
+        final AbstractPacketHandler<T> handler = (AbstractPacketHandler<T>) packetHandlerMap.get(packet.getClass());
+        if (handler == null) {
+            log.warn("No handler found for packet {}", packet.getClass().getSimpleName());
+            return;
+        }
 
+        handler.handlePacket(session, packet);
     }
 
-    void removeClient(final long sessionId) {
+    public void addClient(final Client client) {
+        clientMap.put(client.getSession().getId(), client);
+    }
 
+    public void removeClient(final long sessionId) {
+        clientMap.remove(sessionId);
+    }
+
+    public Client getClientBySession(final IStreamSession session) {
+        return clientMap.get(session.getId());
     }
 
     private static class ServerSessionFactory extends AbstractSessionFactory {
