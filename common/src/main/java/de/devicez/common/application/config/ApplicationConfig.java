@@ -1,27 +1,38 @@
 package de.devicez.common.application.config;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Properties;
+import java.util.UUID;
 
 public class ApplicationConfig extends Properties {
 
-    public void loadFromPath(final String path) throws IOException {
-        final File configurationFile = new File(path);
-        final Path configurationPath = configurationFile.toPath();
-        if (!configurationFile.exists()) {
-            Files.createFile(configurationPath);
-        }
+    private final File file;
 
-        load(new BufferedInputStream(new FileInputStream(configurationFile)));
+    public ApplicationConfig(final File file) throws IOException {
+        this.file = file;
+        load();
+    }
+
+    public void setUUID(final String key, final UUID value) {
+        setProperty(key, value.toString());
+    }
+
+    public UUID getUUID(final String key) {
+        final String property = getProperty(key);
+        return property == null ? null : UUID.fromString(property);
+    }
+
+    public void setString(final String key, final String value) {
+        setProperty(key, value);
     }
 
     public String getString(final String key) {
         return getProperty(key);
+    }
+
+    public void setInt(final String key, final int value) {
+        setProperty(key, Integer.toString(value));
     }
 
     public int getInt(final String key) {
@@ -30,5 +41,17 @@ public class ApplicationConfig extends Properties {
 
     public int getIntOrDefault(final String key, final int defaultValue) {
         return contains(key) ? getInt(key) : defaultValue;
+    }
+
+    public void save() throws IOException {
+        store(new BufferedWriter(new FileWriter(file)), "DeviceZ configuration");
+    }
+
+    private void load() throws IOException {
+        if (!file.exists()) {
+            Files.createFile(file.toPath());
+        }
+
+        load(new BufferedInputStream(new FileInputStream(file)));
     }
 }
