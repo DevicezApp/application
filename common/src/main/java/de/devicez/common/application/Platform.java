@@ -3,6 +3,6 @@ package de.devicez.common.application;
 public enum Platform {
 
     WINDOWS,
-    UNIX
+    LINUX
 
 }

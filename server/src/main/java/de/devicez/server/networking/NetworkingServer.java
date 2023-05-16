@@ -70,7 +70,11 @@ public class NetworkingServer {
             return;
         }
 
-        handler.handlePacket(session, packet);
+        try {
+            handler.handlePacket(session, packet);
+        } catch (final Exception e) {
+            log.error("Error while handling {}", packet.getClass().getSimpleName(), e);
+        }
     }
 
     public void addClient(final Client client) {

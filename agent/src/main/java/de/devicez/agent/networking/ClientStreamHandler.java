@@ -33,7 +33,7 @@ public class ClientStreamHandler extends AbstractStreamHandler {
     @Override
     public void event(SessionEvent event) {
         if (event == SessionEvent.READY) {
-            getSession().write(new LoginPacket(UUID.randomUUID(), "test", Platform.WINDOWS));
+            getSession().writenf(new LoginPacket(client.getApplication().getClientId(), client.getApplication().getHostname(), client.getApplication().getPlatform()));
         }
     }
 

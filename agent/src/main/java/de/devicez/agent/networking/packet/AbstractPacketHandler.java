@@ -11,7 +11,7 @@ public abstract class AbstractPacketHandler<T> {
         this.client = client;
     }
 
-    public abstract void handlePacket(final IStreamSession session, final T packet);
+    public abstract void handlePacket(final IStreamSession session, final T packet) throws Exception;
 
     public NetworkingClient getClient() {
         return client;

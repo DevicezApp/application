@@ -1,7 +1,12 @@
 package de.devicez.agent.networking;
 
+import de.devicez.agent.DeviceZAgentApplication;
 import de.devicez.agent.networking.packet.AbstractPacketHandler;
+import de.devicez.agent.networking.packet.ShutdownCancelPacketHandler;
+import de.devicez.agent.networking.packet.ShutdownPacketHandler;
 import de.devicez.common.packet.AbstractPacket;
+import de.devicez.common.packet.server.ShutdownCancelPacket;
+import de.devicez.common.packet.server.ShutdownPacket;
 import lombok.extern.slf4j.Slf4j;
 import org.snf4j.core.SelectorLoop;
 import org.snf4j.core.session.IStreamSession;
@@ -17,13 +22,16 @@ import java.util.Map;
 public class NetworkingClient {
 
     private final Map<Class<? extends AbstractPacket>, AbstractPacketHandler<?>> packetHandlerMap = new HashMap<>();
+
+    private final DeviceZAgentApplication application;
     private final String hostname;
     private final int port;
 
     private SelectorLoop loop;
     private IStreamSession session;
 
-    public NetworkingClient(final String hostname, final int port) {
+    public NetworkingClient(final DeviceZAgentApplication application, final String hostname, final int port) {
+        this.application = application;
         this.hostname = hostname;
         this.port = port;
 
@@ -32,7 +40,8 @@ public class NetworkingClient {
     }
 
     private void registerPacketHandler() {
-
+        packetHandlerMap.put(ShutdownPacket.class, new ShutdownPacketHandler(this));
+        packetHandlerMap.put(ShutdownCancelPacket.class, new ShutdownCancelPacketHandler(this));
     }
 
     private void start() {
@@ -72,7 +81,11 @@ public class NetworkingClient {
             return;
         }
 
-        handler.handlePacket(session, packet);
+        try {
+            handler.handlePacket(session, packet);
+        } catch (final Exception e) {
+            log.error("Error while handling {}", packet.getClass().getSimpleName(), e);
+        }
     }
 
     private void attemptConnection() {
@@ -89,6 +102,10 @@ public class NetworkingClient {
         } catch (final Exception e) {
             log.error("Error while connecting", e);
         }
+    }
+
+    public DeviceZAgentApplication getApplication() {
+        return application;
     }
 
     public IStreamSession getSession() {

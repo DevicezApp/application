@@ -21,6 +21,8 @@ public class DeviceZAgentApplication extends AbstractApplication {
 
     private Platform platform;
     private File applicationFolder;
+
+    private String hostname;
     private UUID clientId;
 
     @Override
@@ -28,13 +30,19 @@ public class DeviceZAgentApplication extends AbstractApplication {
         try {
             platform = PlatformUtil.determinePlatform();
 
-            final Path applicationFolderPath = PlatformUtil.getApplicationFolder(platform);
+            final Path applicationFolderPath = PlatformUtil.getApplicationFolder();
             applicationFolder = applicationFolderPath.toFile();
 
             if (!applicationFolder.exists()) {
                 Files.createDirectories(applicationFolderPath);
             }
 
+            hostname = PlatformUtil.getHostname();
+        } catch (final IllegalStateException e) {
+            log.error("Error while initializing platform dependant variables", e);
+        }
+
+        try {
             config = new ApplicationConfig(new File(applicationFolder, "config.properties"));
             clientId = config.getUUID("client-id");
 
@@ -48,7 +56,11 @@ public class DeviceZAgentApplication extends AbstractApplication {
             System.exit(1);
         }
 
-        networkingClient = new NetworkingClient(config.getString("hostname"), config.getIntOrDefault("port", 1337));
+        final String serverHostname = config.getString("hostname");
+        final int serverPort = config.getIntOrDefault("port", 1337);
+        log.info("I am {} with client id {}", hostname, clientId);
+
+        networkingClient = new NetworkingClient(this, serverHostname, serverPort);
     }
 
     @Override
@@ -62,6 +74,10 @@ public class DeviceZAgentApplication extends AbstractApplication {
 
     public File getApplicationFolder() {
         return applicationFolder;
+    }
+
+    public String getHostname() {
+        return hostname;
     }
 
     public UUID getClientId() {

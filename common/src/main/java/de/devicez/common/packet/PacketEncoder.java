@@ -12,6 +12,7 @@ public class PacketEncoder implements IEncoder<AbstractPacket, byte[]> {
     @Override
     public void encode(final ISession iSession, final AbstractPacket abstractPacket, final List<byte[]> out) throws Exception {
         final ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
+
         final DataOutputStream dataStream = new DataOutputStream(arrayStream);
         dataStream.writeUTF(abstractPacket.getClass().getCanonicalName());
         abstractPacket.encode(dataStream);
