@@ -3,6 +3,8 @@ package de.devicez.agent.util;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.Kernel32Util;
+import com.sun.security.auth.module.NTSystem;
+import com.sun.security.auth.module.UnixSystem;
 import de.devicez.common.application.Platform;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +28,7 @@ public class PlatformUtil {
         final Platform platform = determinePlatform();
         switch (platform) {
             case WINDOWS -> {
-                return Path.of(System.getenv("APPDATA"), "DeviceZ");
+                return Path.of(System.getenv("ProgramFiles"), "DeviceZ");
             }
             case LINUX -> {
                 return Path.of("/opt/devicez");
@@ -49,6 +51,34 @@ public class PlatformUtil {
                     throw new RuntimeException("gethostname failed");
                 }
                 return Native.toString(hostnameBuffer);
+            }
+        }
+
+        throw new PlatformUnsupportedException();
+    }
+
+    public static String getUsername() throws PlatformUnsupportedException {
+        final Platform platform = determinePlatform();
+        switch (platform) {
+            case WINDOWS -> {
+                return new NTSystem().getName();
+            }
+            case LINUX -> {
+                return new UnixSystem().getUsername();
+            }
+        }
+
+        throw new PlatformUnsupportedException();
+    }
+
+    public static boolean isDaemonUser() {
+        final Platform platform = determinePlatform();
+        switch (platform) {
+            case WINDOWS -> {
+                return getUsername().equals("SYSTEM");
+            }
+            case LINUX -> {
+                // TODO
             }
         }
 

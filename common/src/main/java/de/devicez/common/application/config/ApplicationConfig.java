@@ -31,6 +31,19 @@ public class ApplicationConfig extends Properties {
         return getProperty(key);
     }
 
+    public void setBoolean(final String key, final boolean value) {
+        setProperty(key, Boolean.toString(value));
+    }
+
+    public Boolean getBoolean(final String key) {
+        final String property = getProperty(key);
+        return property == null ? null : Boolean.parseBoolean(property);
+    }
+
+    public boolean getBooleanOrDefault(final String key, final boolean defaultValue) {
+        return containsKey(key) ? getBoolean(key) : defaultValue;
+    }
+
     public void setInt(final String key, final int value) {
         setProperty(key, Integer.toString(value));
     }
@@ -40,7 +53,7 @@ public class ApplicationConfig extends Properties {
     }
 
     public int getIntOrDefault(final String key, final int defaultValue) {
-        return contains(key) ? getInt(key) : defaultValue;
+        return containsKey(key) ? getInt(key) : defaultValue;
     }
 
     public void save() throws IOException {

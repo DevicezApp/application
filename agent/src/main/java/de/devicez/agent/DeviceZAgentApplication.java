@@ -1,5 +1,6 @@
 package de.devicez.agent;
 
+import de.devicez.agent.installer.AgentInstaller;
 import de.devicez.agent.networking.NetworkingClient;
 import de.devicez.agent.util.PlatformUtil;
 import de.devicez.common.application.AbstractApplication;
@@ -40,6 +41,7 @@ public class DeviceZAgentApplication extends AbstractApplication {
             hostname = PlatformUtil.getHostname();
         } catch (final IllegalStateException e) {
             log.error("Error while initializing platform dependant variables", e);
+            System.exit(1);
         }
 
         try {
@@ -57,15 +59,32 @@ public class DeviceZAgentApplication extends AbstractApplication {
         }
 
         final String serverHostname = config.getString("hostname");
+        if (serverHostname == null) {
+            AgentInstaller.startInstallation(this);
+            return;
+        }
+
+        // Only allow non daemon user after installation if in development
+        if (!PlatformUtil.isDaemonUser() && !config.getBooleanOrDefault("dev", false)) {
+            System.exit(1);
+        }
+
         final int serverPort = config.getIntOrDefault("port", 1337);
         log.info("I am {} with client id {}", hostname, clientId);
+        log.info("Running as user: {}", PlatformUtil.getUsername());
 
         networkingClient = new NetworkingClient(this, serverHostname, serverPort);
     }
 
     @Override
     public void shutdown() throws Exception {
-        networkingClient.close();
+        if (networkingClient != null) {
+            networkingClient.close();
+        }
+    }
+
+    public ApplicationConfig getConfig() {
+        return config;
     }
 
     public Platform getPlatform() {
