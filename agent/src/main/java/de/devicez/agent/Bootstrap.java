@@ -1,10 +1,10 @@
-package de.devicez.server;
+package de.devicez.agent;
 
 import de.devicez.common.application.GenericBoostrap;
 
 public class Bootstrap {
 
     public static void main(final String[] args) {
-        GenericBoostrap.run(DeviceZServerApplication::new);
+        GenericBoostrap.run(DeviceZAgentApplication::new);
     }
 }

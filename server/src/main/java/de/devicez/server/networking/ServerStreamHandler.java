@@ -1,9 +1,11 @@
 package de.devicez.server.networking;
 
 import de.devicez.common.packet.AbstractPacket;
+import de.devicez.common.packet.SessionConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.snf4j.core.handler.AbstractStreamHandler;
 import org.snf4j.core.handler.SessionEvent;
+import org.snf4j.core.session.ISessionConfig;
 
 @Slf4j
 public class ServerStreamHandler extends AbstractStreamHandler {
@@ -29,5 +31,10 @@ public class ServerStreamHandler extends AbstractStreamHandler {
         if (event == SessionEvent.CLOSED) {
             server.removeClient(getSession().getId());
         }
+    }
+
+    @Override
+    public ISessionConfig getConfig() {
+        return new SessionConfig();
     }
 }

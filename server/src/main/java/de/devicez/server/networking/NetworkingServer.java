@@ -52,7 +52,7 @@ public class NetworkingServer {
             // Wait for loop to end
             loop.join();
         } catch (final InterruptedException | IOException e) {
-            log.info("Error while starting networking server", e);
+            log.error("Error while starting networking server", e);
             System.exit(1);
         } finally {
             loop.stop();
@@ -75,10 +75,12 @@ public class NetworkingServer {
 
     public void addClient(final Client client) {
         clientMap.put(client.getSession().getId(), client);
+        log.info("Client {} connected from {}", client.getName(), client.getSession().getRemoteAddress().toString());
     }
 
     public void removeClient(final long sessionId) {
-        clientMap.remove(sessionId);
+        final Client client = clientMap.remove(sessionId);
+        log.info("Client {} disconnected", client.getName());
     }
 
     public Client getClientBySession(final IStreamSession session) {

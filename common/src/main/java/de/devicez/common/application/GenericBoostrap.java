@@ -2,8 +2,8 @@ package de.devicez.common.application;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.spi.LoggerContext;
 
 import java.util.function.Supplier;
 
@@ -20,7 +20,6 @@ public final class GenericBoostrap {
             } catch (final Exception e) {
                 log.error("Unhandled exception occurred on shutdown", e);
             }
-            Configurator.shutdown((LoggerContext) LogManager.getContext());
         }));
 
         // Run application

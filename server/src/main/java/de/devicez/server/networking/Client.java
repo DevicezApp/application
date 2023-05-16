@@ -1,10 +1,12 @@
 package de.devicez.server.networking;
 
 import de.devicez.common.application.Platform;
+import lombok.Getter;
 import org.snf4j.core.session.IStreamSession;
 
 import java.util.UUID;
 
+@Getter
 public final class Client {
 
     private final IStreamSession session;
@@ -18,9 +20,5 @@ public final class Client {
         this.id = id;
         this.name = name;
         this.platform = platform;
-    }
-
-    public IStreamSession getSession() {
-        return session;
     }
 }
