@@ -141,8 +141,6 @@ public class AgentInstaller {
                 new ProcessBuilder("systemctl", "start", "devicez")
                         .directory(application.getApplicationFolder())
                         .start();
-
-                // TODO using systemctl / init.d
             }
         }
     }
