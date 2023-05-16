@@ -61,7 +61,7 @@ public class PlatformUtil {
         String command = null;
         switch (platform) {
             case WINDOWS ->
-                    command = "shutdown " + (restart ? "/r " : "/s ") + (delay >= 1 ? "/t " + delay : "") + (force ? "/f " : "") + (message != null && !message.isBlank() ? "/c \"" + message + "\"" : "");
+                    command = "shutdown " + (restart ? "/r " : "/s ") + (delay >= 1 ? "/t " + delay : "") + (force ? " /f " : "") + (message != null && !message.isBlank() ? "/c \"" + message + "\"" : "");
             case LINUX ->
                     command = "shutdown " + (restart ? "-r " : "-h ") + (delay < 1 ? "now" : delay) + (message != null && !message.isBlank() ? " \"" + message + "\"" : "");
         }
