@@ -62,8 +62,8 @@
                             <jar>target/DeviceZAgent.jar</jar>
                             <outfile>target/DeviceZAgent.exe</outfile>
                             <downloadUrl>https://adoptium.net/de/temurin/releases/</downloadUrl>
-                            <icon>src/main/resources/icon.ico</icon>
-                            <manifest>src/main/resources/DeviceZAgent.manifest</manifest>
+                            <icon>src/main/resources/windows/icon.ico</icon>
+                            <manifest>src/main/resources/windows/DeviceZAgent.manifest</manifest>
                             <classPath>
                                 <mainClass>de.devicez.agent.Bootstrap</mainClass>
                             </classPath>

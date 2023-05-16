@@ -78,7 +78,7 @@ public class PlatformUtil {
                 return getUsername().equals("SYSTEM");
             }
             case LINUX -> {
-                // TODO
+                return getUsername().equals("root");
             }
         }
 

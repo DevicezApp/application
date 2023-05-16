@@ -66,7 +66,7 @@ public class DeviceZAgentApplication extends AbstractApplication {
 
         // Only allow non daemon user after installation if in development
         if (!PlatformUtil.isDaemonUser() && !config.getBooleanOrDefault("dev", false)) {
-            System.exit(1);
+            throw new IllegalStateException("not a daemon user");
         }
 
         final int serverPort = config.getIntOrDefault("port", 1337);

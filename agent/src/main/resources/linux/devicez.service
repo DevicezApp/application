@@ -1,0 +1,14 @@
+[Unit]
+Description=DeviceZ Agent
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/devicez
+ExecStart=/usr/bin/env java -jar DeviceZAgent.jar
+Restart=on-failure
+RestartSec=10
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

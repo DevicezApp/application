@@ -2,14 +2,11 @@ package de.devicez.agent.installer;
 
 import com.google.common.net.InetAddresses;
 import de.devicez.agent.DeviceZAgentApplication;
-import de.devicez.common.application.Platform;
 import de.devicez.common.application.config.ApplicationConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -102,12 +99,12 @@ public class AgentInstaller {
         switch (application.getPlatform()) {
             case WINDOWS -> {
                 // Copy WinSW executable
-                try (final InputStream inputStream = AgentInstaller.class.getResource("/DeviceZService.exe").openStream()) {
+                try (final InputStream inputStream = AgentInstaller.class.getResource("/windows/DeviceZService.exe").openStream()) {
                     Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.exe").toPath());
                 }
 
                 // Copy WinSW configuration
-                try (final InputStream inputStream = AgentInstaller.class.getResource("/DeviceZService.xml").openStream()) {
+                try (final InputStream inputStream = AgentInstaller.class.getResource("/windows/DeviceZService.xml").openStream()) {
                     Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.xml").toPath());
                 }
 
@@ -124,6 +121,27 @@ public class AgentInstaller {
                         .start();
             }
             case LINUX -> {
+                // Copy service
+                try (final InputStream inputStream = AgentInstaller.class.getResource("/linux/devicez.service").openStream()) {
+                    Files.copy(inputStream, new File("/etc/systemd/system/devicez.service").toPath());
+                }
+
+                final Process reloadProcess = new ProcessBuilder("systemctl", "daemon-reload")
+                        .directory(application.getApplicationFolder())
+                        .start();
+
+                reloadProcess.waitFor();
+
+                final Process enableProcess = new ProcessBuilder("systemctl", "enable", "devicez")
+                        .directory(application.getApplicationFolder())
+                        .start();
+
+                enableProcess.waitFor();
+
+                new ProcessBuilder("systemctl", "start", "devicez")
+                        .directory(application.getApplicationFolder())
+                        .start();
+
                 // TODO using systemctl / init.d
             }
         }
