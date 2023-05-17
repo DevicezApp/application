@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,6 +90,10 @@ public class NetworkingServer {
 
     public Client getClientBySession(final IStreamSession session) {
         return clientMap.get(session.getId());
+    }
+
+    public Collection<Client> getClients() {
+        return clientMap.values();
     }
 
     private static class ServerSessionFactory extends AbstractSessionFactory {
