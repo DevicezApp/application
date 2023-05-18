@@ -18,12 +18,14 @@ public class LoginPacket extends AbstractPacket {
     private UUID id;
     private String name;
     private Platform platform;
+    private byte[] hardwareAddress;
 
     @Override
     public void decode(final DataInputStream stream) throws IOException {
         id = new UUID(stream.readLong(), stream.readLong());
         name = stream.readUTF();
         platform = Platform.values()[stream.readShort()];
+        hardwareAddress = stream.readNBytes(stream.readInt());
     }
 
     @Override
@@ -32,5 +34,7 @@ public class LoginPacket extends AbstractPacket {
         stream.writeLong(id.getMostSignificantBits());
         stream.writeUTF(name);
         stream.writeShort(platform.ordinal());
+        stream.writeInt(hardwareAddress.length);
+        stream.write(hardwareAddress);
     }
 }

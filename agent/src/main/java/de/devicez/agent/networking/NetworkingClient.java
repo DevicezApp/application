@@ -104,7 +104,7 @@ public class NetworkingClient {
         try {
             session.writenf(new HeartbeatPacket(NetworkUtil.getHardwareAddress()));
         } catch (final IOException e) {
-            log.error("Error while sending heartbeat", e);
+            log.error("Error while sending HeartbeatPacket", e);
         }
     }
 

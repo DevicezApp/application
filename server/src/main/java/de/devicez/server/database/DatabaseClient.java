@@ -83,10 +83,18 @@ public class DatabaseClient {
 
     public <T extends AbstractDatabaseSerializable> List<T> readSerializableList(final Class<T> clazz, final String column, final Object value) throws DatabaseException {
         try {
-            final AbstractDatabaseSerializable serializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
-            final QueryConstructor queryConstructor = serializable.constructDeserializeQuery(column, value);
+            final AbstractDatabaseSerializable globalSerializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
+            final QueryConstructor queryConstructor = globalSerializable.constructDeserializeQuery(column, value);
 
             return queryList(queryConstructor.query(), queryConstructor::statement, resultSet -> {
+                final AbstractDatabaseSerializable serializable;
+                try {
+                    serializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                         NoSuchMethodException e) {
+                    log.error("Error while executing database query", e);
+                    throw new RuntimeException(e);
+                }
                 serializable.deserialize(resultSet);
                 return (T) serializable;
             });

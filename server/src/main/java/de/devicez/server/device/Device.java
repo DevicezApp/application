@@ -26,11 +26,12 @@ public class Device extends AbstractDatabaseSerializable {
         super(application);
     }
 
-    public Device(final DeviceZServerApplication application, final UUID id, final String name, final Platform platform) {
+    public Device(final DeviceZServerApplication application, final UUID id, final String name, final Platform platform, final byte[] macAddress) {
         super(application);
         this.id = id;
         this.name = name;
         this.platform = platform;
+        this.macAddress = macAddress;
     }
 
     @Override

@@ -19,8 +19,8 @@ public class DeviceRegistry {
         this.application = application;
     }
 
-    public void handleDeviceConnect(final UUID id, final String name, final Platform platform, final IStreamSession session) {
-        final ConnectedDevice device = new ConnectedDevice(application, id, name, platform, session);
+    public void handleDeviceConnect(final UUID id, final String name, final Platform platform, final byte[] hardwareAddress, final IStreamSession session) {
+        final ConnectedDevice device = new ConnectedDevice(application, id, name, platform, hardwareAddress, session);
         connectedDeviceMap.put(session.getId(), device);
         log.info("Device {} connected from {}", name, session.getRemoteAddress().toString());
 

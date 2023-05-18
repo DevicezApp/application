@@ -12,6 +12,7 @@ public class LoginPacketHandler extends AbstractPacketHandler<LoginPacket> {
 
     @Override
     public void handlePacket(final IStreamSession session, final LoginPacket packet) {
-        getServer().getApplication().getDeviceRegistry().handleDeviceConnect(packet.getId(), packet.getName(), packet.getPlatform(), session);
+        getServer().getApplication().getDeviceRegistry().handleDeviceConnect(packet.getId(), packet.getName(), packet.getPlatform(),
+                packet.getHardwareAddress(), session);
     }
 }

@@ -18,8 +18,9 @@ public class ConnectedDevice extends Device {
 
     private final IStreamSession session;
 
-    public ConnectedDevice(final DeviceZServerApplication application, final UUID id, final String name, final Platform platform, final IStreamSession session) {
-        super(application, id, name, platform);
+    public ConnectedDevice(final DeviceZServerApplication application, final UUID id, final String name,
+                           final Platform platform, final byte[] macAddress, final IStreamSession session) {
+        super(application, id, name, platform, macAddress);
         this.session = session;
     }
 

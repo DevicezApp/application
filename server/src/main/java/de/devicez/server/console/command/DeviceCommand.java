@@ -2,6 +2,7 @@ package de.devicez.server.console.command;
 
 import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.Column;
+import de.devicez.common.util.NetworkUtil;
 import de.devicez.server.DeviceZServerApplication;
 import de.devicez.server.device.ConnectedDevice;
 import de.devicez.server.device.Device;
@@ -48,6 +49,7 @@ public class DeviceCommand extends AbstractCommandHandler {
                             new Column().header("ID").with(client -> client.getId().toString()),
                             new Column().header("Name").with(Device::getName),
                             new Column().header("Platform").with(client -> client.getPlatform().toString()),
+                            new Column().header("MAC").with(client -> NetworkUtil.formatHardwareAddress(client.getMacAddress())),
                             new Column().header("Connected").with(client -> client instanceof ConnectedDevice ? "Yes" : "No"),
                             new Column().header("Last seen").with(this::formatLastSeen)));
                     log.info("\n" + table);
@@ -63,7 +65,8 @@ public class DeviceCommand extends AbstractCommandHandler {
                     final String table = AsciiTable.getTable(AsciiTable.FANCY_ASCII, devices, Arrays.asList(
                             new Column().header("ID").with(client -> client.getId().toString()),
                             new Column().header("Name").with(Device::getName),
-                            new Column().header("Platform").with(client -> client.getPlatform().toString())));
+                            new Column().header("Platform").with(client -> client.getPlatform().toString()),
+                            new Column().header("MAC").with(client -> NetworkUtil.formatHardwareAddress(client.getMacAddress()))));
                     log.info("\n" + table);
                 } else {
                     log.info("Usage: device list <all/connected>");
