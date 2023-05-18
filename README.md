@@ -10,7 +10,7 @@ interacts.
 
 This is a free-time project. I'd like to create a completely open-source and free (as in freedom) device management
 system. Many such tools popular in the industry are *very* expensive and often unaffordable, especially for smaller
-business. Besides costs, many of those tools require a permanent internet connection and rely on a cloud provider.
+businesses. Besides costs, many of those tools require a permanent internet connection and rely on a cloud provider.
 
 **The main aims of this project therefore are:**
 
