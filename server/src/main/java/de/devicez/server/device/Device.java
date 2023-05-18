@@ -5,6 +5,7 @@ import de.devicez.common.util.NetworkUtil;
 import de.devicez.server.DeviceZServerApplication;
 import de.devicez.server.database.AbstractDatabaseSerializable;
 import de.devicez.server.database.ConstructedQuery;
+import de.devicez.server.database.ParameterConstructedQuerySupplier;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
@@ -12,12 +13,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.*;
 import java.util.UUID;
-import java.util.function.Function;
 
 @Slf4j
 public class Device extends AbstractDatabaseSerializable {
 
-    public static final ConstructedQuery QUERY_ALL = new ConstructedQuery() {
+    public static final ConstructedQuery SELECT_ALL = new ConstructedQuery() {
         @Override
         public String query() {
             return "SELECT * FROM devicez_devices";
@@ -28,7 +28,7 @@ public class Device extends AbstractDatabaseSerializable {
         }
     };
 
-    public static final Function<UUID, ConstructedQuery> QUERY_ID = id -> new ConstructedQuery() {
+    public static final ParameterConstructedQuerySupplier<UUID> SELECT_ID = id -> new ConstructedQuery() {
         @Override
         public String query() {
             return "SELECT * FROM devicez_devices WHERE id = ?";

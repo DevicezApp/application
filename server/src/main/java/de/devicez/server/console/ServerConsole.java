@@ -1,10 +1,7 @@
 package de.devicez.server.console;
 
 import de.devicez.server.DeviceZServerApplication;
-import de.devicez.server.console.command.AbstractCommandHandler;
-import de.devicez.server.console.command.DeviceCommand;
-import de.devicez.server.console.command.ExitCommand;
-import de.devicez.server.console.command.HelpCommand;
+import de.devicez.server.console.command.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -22,6 +19,7 @@ public class ServerConsole {
 
     private void registerCommandHandlers() {
         commandHandlerMap.put("device", new DeviceCommand(application));
+        commandHandlerMap.put("devicegroup", new DeviceGroupCommand(application));
         commandHandlerMap.put("help", new HelpCommand(application));
         commandHandlerMap.put("exit", new ExitCommand(application));
     }
@@ -38,7 +36,11 @@ public class ServerConsole {
                 continue;
             }
 
-            handler.onCommand(Arrays.copyOfRange(userInputParts, 1, userInputParts.length));
+            try {
+                handler.onCommand(Arrays.copyOfRange(userInputParts, 1, userInputParts.length));
+            } catch (final Exception e) {
+                log.error("Error while executing command {}", command, e);
+            }
         }
     }
 

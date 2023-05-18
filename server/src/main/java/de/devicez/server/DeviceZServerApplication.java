@@ -5,6 +5,7 @@ import de.devicez.common.application.config.ApplicationConfig;
 import de.devicez.server.console.ServerConsole;
 import de.devicez.server.database.DatabaseClient;
 import de.devicez.server.device.DeviceRegistry;
+import de.devicez.server.device.group.DeviceGroupRegistry;
 import de.devicez.server.http.HTTPServer;
 import de.devicez.server.networking.NetworkingServer;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +20,9 @@ public class DeviceZServerApplication extends AbstractApplication {
 
     private DatabaseClient databaseClient;
     private DeviceRegistry deviceRegistry;
+    private DeviceGroupRegistry deviceGroupRegistry;
     private NetworkingServer networkingServer;
     private HTTPServer httpServer;
-
 
     private ServerConsole console;
 
@@ -39,6 +40,7 @@ public class DeviceZServerApplication extends AbstractApplication {
                 config.getStringOrDefault("mysql-username", "username"), config.getStringOrDefault("mysql-password", "password"));
 
         deviceRegistry = new DeviceRegistry(this);
+        deviceGroupRegistry = new DeviceGroupRegistry(this);
 
         networkingServer = new NetworkingServer(this, config.getIntOrDefault("networking-port", 1337));
         httpServer = new HTTPServer(config.getIntOrDefault("http-port", 8080), config.getString("api-key"));
@@ -63,6 +65,10 @@ public class DeviceZServerApplication extends AbstractApplication {
 
     public DeviceRegistry getDeviceRegistry() {
         return deviceRegistry;
+    }
+
+    public DeviceGroupRegistry getDeviceGroupRegistry() {
+        return deviceGroupRegistry;
     }
 
     public NetworkingServer getNetworkingServer() {

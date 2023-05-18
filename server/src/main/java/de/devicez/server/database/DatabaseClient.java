@@ -30,6 +30,10 @@ public class DatabaseClient {
         this.dataSource = new HikariDataSource(config);
     }
 
+    public <T> T query(final ConstructedQuery query, final ResultSetTransformer<T> transformer) {
+        return query(query.query(), query::preparedStatement, transformer);
+    }
+
     public <T> T query(final String query, final PreparedStatementModifier modifier, final ResultSetTransformer<T> transformer) {
         try {
             try (final Connection connection = dataSource.getConnection(); final PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -47,18 +51,24 @@ public class DatabaseClient {
         }
     }
 
+    public <T> List<T> queryList(final ConstructedQuery query, final ResultSetTransformer<T> consumer) {
+        return queryList(query.query(), query::preparedStatement, consumer);
+    }
+
     public <T> List<T> queryList(final String query, final PreparedStatementModifier modifier, final ResultSetTransformer<T> consumer) {
         try {
-            try (final Connection connection = dataSource.getConnection(); final PreparedStatement preparedStatement = connection.prepareStatement(query); final ResultSet resultSet = preparedStatement.executeQuery();) {
+            try (final Connection connection = dataSource.getConnection(); final PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 if (modifier != null) {
                     modifier.apply(preparedStatement);
                 }
 
-                final List<T> list = new ArrayList<>();
-                while (resultSet.next()) {
-                    list.add(consumer.apply(resultSet));
+                try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+                    final List<T> list = new ArrayList<>();
+                    while (resultSet.next()) {
+                        list.add(consumer.apply(resultSet));
+                    }
+                    return list;
                 }
-                return list;
             }
         } catch (final Exception e) {
             log.error("Error while executing database query", e);
@@ -113,6 +123,10 @@ public class DatabaseClient {
 
     public void prepare(final String query) throws DatabaseException {
         prepare(query, null);
+    }
+
+    public void prepare(final ConstructedQuery query) throws DatabaseException {
+        prepare(query.query(), query::preparedStatement);
     }
 
     public void prepare(final String query, final PreparedStatementModifier modifier) throws DatabaseException {

@@ -30,7 +30,7 @@ public class DeviceCommand extends AbstractCommandHandler {
                     if (args[1].equalsIgnoreCase("all")) {
                         final Collection<Device> devices = getApplication().getDeviceRegistry().getAllDevices();
                         if (devices.isEmpty()) {
-                            log.info("No devices.");
+                            log.error("No devices.");
                             return;
                         }
 
@@ -42,7 +42,7 @@ public class DeviceCommand extends AbstractCommandHandler {
                     } else if (args[1].equalsIgnoreCase("connected")) {
                         final Collection<ConnectedDevice> devices = getApplication().getDeviceRegistry().getConnectedDevices();
                         if (devices.isEmpty()) {
-                            log.info("No devices connected.");
+                            log.error("No devices connected.");
                             return;
                         }
 

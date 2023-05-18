@@ -66,11 +66,11 @@ public class DeviceRegistry {
             return connectedDevice;
         }
 
-        return application.getDatabaseClient().query(Device.class, Device.QUERY_ID.apply(id));
+        return application.getDatabaseClient().query(Device.class, Device.SELECT_ID.apply(id));
     }
 
     public Collection<Device> getAllDevices() {
-        final List<Device> devices = application.getDatabaseClient().queryList(Device.class, Device.QUERY_ALL);
+        final List<Device> devices = application.getDatabaseClient().queryList(Device.class, Device.SELECT_ALL);
         devices.removeIf(device -> {
             for (final ConnectedDevice connectedDevice : connectedDeviceSessionMap.values()) {
                 if (connectedDevice.getId().equals(device.getId())) {
