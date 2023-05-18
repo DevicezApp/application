@@ -39,4 +39,4 @@ This software uses some other open-source libraries, which freed me from a lot o
 here:
 
 - [snf4j](https://github.com/snf4j/snf4j) – Provides an awesome and perfectly simple TCP networking library
-- [Javalin](https://github.com/javalin/javalin) – An lightweight and easy-to-use HTTP server, perfect for REST-APIs
+- [Javalin](https://github.com/javalin/javalin) – A lightweight and easy-to-use HTTP server, perfect for REST-APIs
