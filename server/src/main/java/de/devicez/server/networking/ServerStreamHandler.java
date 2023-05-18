@@ -34,6 +34,11 @@ public class ServerStreamHandler extends AbstractStreamHandler {
     }
 
     @Override
+    public void exception(final Throwable t) {
+        log.error("Error in networking", t);
+    }
+
+    @Override
     public ISessionConfig getConfig() {
         return new SessionConfig();
     }

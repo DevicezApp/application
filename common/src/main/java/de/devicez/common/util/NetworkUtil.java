@@ -2,6 +2,7 @@ package de.devicez.common.util;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Enumeration;
 import java.util.List;
 
 public class NetworkUtil {
@@ -22,14 +23,21 @@ public class NetworkUtil {
     }
 
     public static byte[] getHardwareAddress() throws IOException {
-        final InetAddress address = InetAddress.getLocalHost();
-        final NetworkInterface networkInterface = NetworkInterface.getByInetAddress(address);
-        return networkInterface.getHardwareAddress();
+        final NetworkInterface networkInterface = getCurrentInterface();
+        if (networkInterface == null) {
+            throw new IllegalStateException("network unavailable");
+        }
+
+        byte[] hardwareAddress = networkInterface.getHardwareAddress();
+        if (hardwareAddress == null) {
+            throw new IllegalStateException("network unavailable");
+        }
+
+        return hardwareAddress;
     }
 
     public static InetAddress getBroadcastAddress() throws IOException {
-        final InetAddress address = InetAddress.getLocalHost();
-        final NetworkInterface networkInterface = NetworkInterface.getByInetAddress(address);
+        final NetworkInterface networkInterface = getCurrentInterface();
         final List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
         for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
             final InetAddress broadcast = interfaceAddress.getBroadcast();
@@ -40,6 +48,22 @@ public class NetworkUtil {
         }
 
         return null;
+    }
+
+    public static NetworkInterface getCurrentInterface() throws IOException {
+        final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+        while (networkInterfaces.hasMoreElements()) {
+            final NetworkInterface networkInterface = networkInterfaces.nextElement();
+            if (networkInterface.isUp()) {
+                final Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+                while (inetAddresses.hasMoreElements()) {
+                    final InetAddress address = inetAddresses.nextElement();
+                    if (address.isSiteLocalAddress()) return networkInterface;
+                }
+            }
+        }
+
+        throw new IllegalStateException("unable to obtain network interface");
     }
 
     public static String formatHardwareAddress(final byte[] hardwareAddress) {

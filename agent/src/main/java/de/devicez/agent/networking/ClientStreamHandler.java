@@ -38,10 +38,15 @@ public class ClientStreamHandler extends AbstractStreamHandler {
             try {
                 getSession().writenf(new LoginPacket(client.getApplication().getClientId(), client.getApplication().getHostname(),
                         client.getApplication().getPlatform(), NetworkUtil.getHardwareAddress()));
-            } catch (final IOException e){
+            } catch (final IOException e) {
                 log.error("Error while sending LoginPacket", e);
             }
         }
+    }
+
+    @Override
+    public void exception(final Throwable t) {
+        log.error("Error in networking", t);
     }
 
     @Override

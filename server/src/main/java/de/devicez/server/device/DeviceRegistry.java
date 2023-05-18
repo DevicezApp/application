@@ -23,15 +23,12 @@ public class DeviceRegistry {
     public void handleDeviceConnect(final UUID id, final String name, final Platform platform, final byte[] hardwareAddress, final IStreamSession session) {
         final ConnectedDevice newDevice = new ConnectedDevice(application, id, name, platform, hardwareAddress, session);
 
-        // Check if there is already a device with that id online
-        final ConnectedDevice connectedDevice = connectedDeviceIdMap.get(id);
+        // Add to id map and check if there is already a device with that id online
+        final ConnectedDevice connectedDevice = connectedDeviceIdMap.put(id, newDevice);
         if (connectedDevice != null) {
-            connectedDevice.getSession().quickClose();
+            connectedDevice.getSession().dirtyClose();
             log.warn("Device {} logged in from another location", name);
         }
-
-        // Add to id map
-        connectedDeviceIdMap.put(id, newDevice);
 
         // Add to session map
         connectedDeviceSessionMap.put(session.getId(), newDevice);

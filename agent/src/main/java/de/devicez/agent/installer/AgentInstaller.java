@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Scanner;
 
 @Slf4j
@@ -100,12 +101,12 @@ public class AgentInstaller {
             case WINDOWS -> {
                 // Copy WinSW executable
                 try (final InputStream inputStream = AgentInstaller.class.getResource("/windows/DeviceZService.exe").openStream()) {
-                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.exe").toPath());
+                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.exe").toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
 
                 // Copy WinSW configuration
                 try (final InputStream inputStream = AgentInstaller.class.getResource("/windows/DeviceZService.xml").openStream()) {
-                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.xml").toPath());
+                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.xml").toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
 
                 // Register service
@@ -123,7 +124,7 @@ public class AgentInstaller {
             case LINUX -> {
                 // Copy service
                 try (final InputStream inputStream = AgentInstaller.class.getResource("/linux/devicez.service").openStream()) {
-                    Files.copy(inputStream, new File("/etc/systemd/system/devicez.service").toPath());
+                    Files.copy(inputStream, new File("/etc/systemd/system/devicez.service").toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
 
                 final Process reloadProcess = new ProcessBuilder("systemctl", "daemon-reload")
