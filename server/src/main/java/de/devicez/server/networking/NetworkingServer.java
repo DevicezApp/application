@@ -2,6 +2,7 @@ package de.devicez.server.networking;
 
 import de.devicez.common.packet.AbstractPacket;
 import de.devicez.common.packet.client.LoginPacket;
+import de.devicez.server.DeviceZServerApplication;
 import de.devicez.server.networking.packet.AbstractPacketHandler;
 import de.devicez.server.networking.packet.LoginPacketHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -14,19 +15,20 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 public class NetworkingServer {
 
+    private final DeviceZServerApplication application;
     private final Map<Class<? extends AbstractPacket>, AbstractPacketHandler<?>> packetHandlerMap = new HashMap<>();
-    private final Map<Long, Client> clientMap = new HashMap<>();
 
     private SelectorLoop loop;
 
-    public NetworkingServer(final int port) {
+    public NetworkingServer(final DeviceZServerApplication application, final int port) {
+        this.application = application;
+
         registerPacketHandler();
         new Thread(() -> start(port)).start();
     }
@@ -78,22 +80,8 @@ public class NetworkingServer {
         }
     }
 
-    public void addClient(final Client client) {
-        clientMap.put(client.getSession().getId(), client);
-        log.info("Client {} connected from {}", client.getName(), client.getSession().getRemoteAddress().toString());
-    }
-
-    public void removeClient(final long sessionId) {
-        final Client client = clientMap.remove(sessionId);
-        log.info("Client {} disconnected", client.getName());
-    }
-
-    public Client getClientBySession(final IStreamSession session) {
-        return clientMap.get(session.getId());
-    }
-
-    public Collection<Client> getClients() {
-        return clientMap.values();
+    public DeviceZServerApplication getApplication() {
+        return application;
     }
 
     private static class ServerSessionFactory extends AbstractSessionFactory {

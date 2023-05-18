@@ -29,7 +29,7 @@ public class ServerStreamHandler extends AbstractStreamHandler {
     @Override
     public void event(final SessionEvent event) {
         if (event == SessionEvent.CLOSED) {
-            server.removeClient(getSession().getId());
+            server.getApplication().getDeviceRegistry().handleDeviceDisconnect(getSession().getId());
         }
     }
 

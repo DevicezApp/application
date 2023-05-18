@@ -31,6 +31,10 @@ public class ApplicationConfig extends Properties {
         return getProperty(key);
     }
 
+    public String getStringOrDefault(final String key, final String defaultValue) {
+        return containsKey(key) ? getString(key) : defaultValue;
+    }
+
     public void setBoolean(final String key, final boolean value) {
         setProperty(key, Boolean.toString(value));
     }

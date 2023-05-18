@@ -3,6 +3,8 @@ package de.devicez.server;
 import de.devicez.common.application.AbstractApplication;
 import de.devicez.common.application.config.ApplicationConfig;
 import de.devicez.server.console.ServerConsole;
+import de.devicez.server.database.DatabaseClient;
+import de.devicez.server.device.DeviceRegistry;
 import de.devicez.server.http.HTTPServer;
 import de.devicez.server.networking.NetworkingServer;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +16,13 @@ import java.io.IOException;
 public class DeviceZServerApplication extends AbstractApplication {
 
     private ApplicationConfig config;
+
+    private DatabaseClient databaseClient;
+    private DeviceRegistry deviceRegistry;
     private NetworkingServer networkingServer;
     private HTTPServer httpServer;
+
+
     private ServerConsole console;
 
     @Override
@@ -27,7 +34,13 @@ public class DeviceZServerApplication extends AbstractApplication {
             System.exit(1);
         }
 
-        networkingServer = new NetworkingServer(config.getIntOrDefault("networking-port", 1337));
+        databaseClient = new DatabaseClient(config.getStringOrDefault("mysql-hostname", "localhost"),
+                config.getIntOrDefault("mysql-port", 3306), config.getStringOrDefault("mysql-database", "database"),
+                config.getStringOrDefault("mysql-username", "username"), config.getStringOrDefault("mysql-password", "password"));
+
+        deviceRegistry = new DeviceRegistry(this);
+
+        networkingServer = new NetworkingServer(this, config.getIntOrDefault("networking-port", 1337));
         httpServer = new HTTPServer(config.getIntOrDefault("http-port", 8080), config.getString("api-key"));
 
         console = new ServerConsole(this);
@@ -42,6 +55,14 @@ public class DeviceZServerApplication extends AbstractApplication {
 
     public ApplicationConfig getConfig() {
         return config;
+    }
+
+    public DatabaseClient getDatabaseClient() {
+        return databaseClient;
+    }
+
+    public DeviceRegistry getDeviceRegistry() {
+        return deviceRegistry;
     }
 
     public NetworkingServer getNetworkingServer() {
