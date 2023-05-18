@@ -1,26 +1,33 @@
 package de.devicez.server.device;
 
 import de.devicez.common.application.Platform;
-import de.devicez.server.database.DatabaseSerializable;
+import de.devicez.common.util.NetworkUtil;
+import de.devicez.server.DeviceZServerApplication;
+import de.devicez.server.database.AbstractDatabaseSerializable;
 import de.devicez.server.database.QueryConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.sql.*;
 import java.util.UUID;
 
-public class Device implements DatabaseSerializable {
+@Slf4j
+public class Device extends AbstractDatabaseSerializable {
 
     private UUID id;
     private String name;
     private Platform platform;
+    private byte[] macAddress = new byte[0];
     private Timestamp lastSeen;
 
-    public Device() {
+    public Device(final DeviceZServerApplication application) {
+        super(application);
     }
 
-    public Device(final UUID id, final String name, final Platform platform) {
+    public Device(final DeviceZServerApplication application, final UUID id, final String name, final Platform platform) {
+        super(application);
         this.id = id;
         this.name = name;
         this.platform = platform;
@@ -31,7 +38,7 @@ public class Device implements DatabaseSerializable {
         return new QueryConstructor() {
             @Override
             public String query() {
-                return "INSERT INTO devicez_devices (id, name, platform) VALUES(?,?,?) ON DUPLICATE KEY UPDATE name=?,platform=?,last_seen=?";
+                return "INSERT INTO devicez_devices (id, name, platform) VALUES(?,?,?) ON DUPLICATE KEY UPDATE name=?,platform=?,mac_address=?,last_seen=?";
             }
 
             @Override
@@ -41,7 +48,8 @@ public class Device implements DatabaseSerializable {
                 statement.setString(3, platform.name());
                 statement.setString(4, name);
                 statement.setString(5, platform.name());
-                statement.setTimestamp(6, lastSeen != null ? lastSeen : new Timestamp(System.currentTimeMillis()));
+                statement.setBlob(6, new ByteArrayInputStream(macAddress), macAddress.length);
+                statement.setTimestamp(7, lastSeen != null ? lastSeen : new Timestamp(System.currentTimeMillis()));
                 return statement;
             }
         };
@@ -70,7 +78,21 @@ public class Device implements DatabaseSerializable {
         id = UUID.fromString(resultSet.getString("id"));
         name = resultSet.getString("name");
         platform = Platform.valueOf(resultSet.getString("platform"));
+
+        final Blob macAddressBlob = resultSet.getBlob("mac_address");
+        macAddress = macAddressBlob.getBytes(1, (int) macAddressBlob.length());
+        macAddressBlob.free();
+
         lastSeen = resultSet.getTimestamp("last_seen");
+    }
+
+    public void wakeUp() {
+        try {
+            final InetAddress broadcastAddress = NetworkUtil.getBroadcastAddress();
+            NetworkUtil.sendMagicPaket(broadcastAddress, getMacAddress());
+        } catch (final IOException e) {
+            log.error("Error while waking up device", e);
+        }
     }
 
     public UUID getId() {
@@ -83,6 +105,14 @@ public class Device implements DatabaseSerializable {
 
     public Platform getPlatform() {
         return platform;
+    }
+
+    public byte[] getMacAddress() {
+        return macAddress;
+    }
+
+    public void setMacAddress(final byte[] macAddress) {
+        this.macAddress = macAddress;
     }
 
     public Timestamp getLastSeen() {

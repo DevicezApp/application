@@ -9,8 +9,6 @@ import org.snf4j.core.handler.AbstractStreamHandler;
 import org.snf4j.core.handler.SessionEvent;
 import org.snf4j.core.session.ISessionConfig;
 
-import java.util.UUID;
-
 @Slf4j
 public class ClientStreamHandler extends AbstractStreamHandler {
 

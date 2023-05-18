@@ -1,9 +1,11 @@
 package de.devicez.server.networking;
 
 import de.devicez.common.packet.AbstractPacket;
+import de.devicez.common.packet.client.HeartbeatPacket;
 import de.devicez.common.packet.client.LoginPacket;
 import de.devicez.server.DeviceZServerApplication;
 import de.devicez.server.networking.packet.AbstractPacketHandler;
+import de.devicez.server.networking.packet.HeartbeatPacketHandler;
 import de.devicez.server.networking.packet.LoginPacketHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.snf4j.core.SelectorLoop;
@@ -35,6 +37,7 @@ public class NetworkingServer {
 
     private void registerPacketHandler() {
         packetHandlerMap.put(LoginPacket.class, new LoginPacketHandler(this));
+        packetHandlerMap.put(HeartbeatPacket.class, new HeartbeatPacketHandler(this));
     }
 
     private void start(final int port) {

@@ -1,12 +1,12 @@
 package de.devicez.server.device;
 
 import de.devicez.common.application.Platform;
+import de.devicez.common.packet.client.HeartbeatPacket;
 import de.devicez.server.DeviceZServerApplication;
 import lombok.extern.slf4j.Slf4j;
 import org.snf4j.core.session.IStreamSession;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -20,7 +20,7 @@ public class DeviceRegistry {
     }
 
     public void handleDeviceConnect(final UUID id, final String name, final Platform platform, final IStreamSession session) {
-        final ConnectedDevice device = new ConnectedDevice(id, name, platform, session);
+        final ConnectedDevice device = new ConnectedDevice(application, id, name, platform, session);
         connectedDeviceMap.put(session.getId(), device);
         log.info("Device {} connected from {}", name, session.getRemoteAddress().toString());
 
@@ -35,6 +35,11 @@ public class DeviceRegistry {
 
         // Update information in database
         application.getDatabaseClient().saveSerializable(device);
+    }
+
+    public void handleDeviceHeartbeat(final IStreamSession session, final HeartbeatPacket packet) {
+        final ConnectedDevice device = getConnectedDeviceBySession(session);
+        device.applyHeartbeat(packet);
     }
 
     public Device getDeviceById(final UUID id) {

@@ -5,8 +5,10 @@ import de.devicez.agent.networking.packet.AbstractPacketHandler;
 import de.devicez.agent.networking.packet.ShutdownCancelPacketHandler;
 import de.devicez.agent.networking.packet.ShutdownPacketHandler;
 import de.devicez.common.packet.AbstractPacket;
+import de.devicez.common.packet.client.HeartbeatPacket;
 import de.devicez.common.packet.server.ShutdownCancelPacket;
 import de.devicez.common.packet.server.ShutdownPacket;
+import de.devicez.common.util.NetworkUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.snf4j.core.SelectorLoop;
 import org.snf4j.core.session.IStreamSession;
@@ -20,6 +22,9 @@ import java.util.Map;
 
 @Slf4j
 public class NetworkingClient {
+
+    private static final int RETRY_INTERVAL = 1000;
+    private static final int HEARTBEAT_INTERVAL = 5000;
 
     private final Map<Class<? extends AbstractPacket>, AbstractPacketHandler<?>> packetHandlerMap = new HashMap<>();
 
@@ -51,14 +56,21 @@ public class NetworkingClient {
 
             long lastAttempt = 0;
             while (loop.isOpen()) {
+                final long now = System.currentTimeMillis();
                 if (session == null || !session.isOpen()) {
-                    final long now = System.currentTimeMillis();
-                    if (now - lastAttempt < 1000) {
+                    if (now - lastAttempt < RETRY_INTERVAL) {
                         continue;
                     }
 
                     lastAttempt = now;
                     attemptConnection();
+                } else {
+                    if (now - lastAttempt < HEARTBEAT_INTERVAL) {
+                        continue;
+                    }
+
+                    lastAttempt = now;
+                    sendHeartbeat();
                 }
             }
 
@@ -85,6 +97,14 @@ public class NetworkingClient {
             handler.handlePacket(session, packet);
         } catch (final Exception e) {
             log.error("Error while handling {}", packet.getClass().getSimpleName(), e);
+        }
+    }
+
+    private void sendHeartbeat() {
+        try {
+            session.writenf(new HeartbeatPacket(NetworkUtil.getHardwareAddress()));
+        } catch (final IOException e) {
+            log.error("Error while sending heartbeat", e);
         }
     }
 

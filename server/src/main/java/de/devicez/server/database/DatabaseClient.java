@@ -2,6 +2,7 @@ package de.devicez.server.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import de.devicez.server.DeviceZServerApplication;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
@@ -16,9 +17,11 @@ import java.util.function.Function;
 @Slf4j
 public class DatabaseClient {
 
+    private final DeviceZServerApplication application;
     private final HikariDataSource dataSource;
 
-    public DatabaseClient(final String hostname, final int port, final String database, final String username, final String password) {
+    public DatabaseClient(final DeviceZServerApplication application, final String hostname, final int port, final String database, final String username, final String password) {
+        this.application = application;
         final HikariConfig config = new HikariConfig();
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setJdbcUrl("jdbc:mysql://" + hostname + ":" + port + "/" + database + "?useSSL=false");
@@ -58,9 +61,9 @@ public class DatabaseClient {
         }
     }
 
-    public <T extends DatabaseSerializable> T readSerializable(final Class<T> clazz, final String column, final Object value) throws DatabaseException {
+    public <T extends AbstractDatabaseSerializable> T readSerializable(final Class<T> clazz, final String column, final Object value) throws DatabaseException {
         try {
-            final DatabaseSerializable serializable = clazz.getDeclaredConstructor().newInstance();
+            final AbstractDatabaseSerializable serializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
             final QueryConstructor queryConstructor = serializable.constructDeserializeQuery(column, value);
 
             return query(queryConstructor.query(), queryConstructor::statement, resultSet -> {
@@ -74,13 +77,13 @@ public class DatabaseClient {
         }
     }
 
-    public <T extends DatabaseSerializable> List<T> readSerializableList(final Class<T> clazz) {
+    public <T extends AbstractDatabaseSerializable> List<T> readSerializableList(final Class<T> clazz) {
         return readSerializableList(clazz, null, null);
     }
 
-    public <T extends DatabaseSerializable> List<T> readSerializableList(final Class<T> clazz, final String column, final Object value) throws DatabaseException {
+    public <T extends AbstractDatabaseSerializable> List<T> readSerializableList(final Class<T> clazz, final String column, final Object value) throws DatabaseException {
         try {
-            final DatabaseSerializable serializable = clazz.getDeclaredConstructor().newInstance();
+            final AbstractDatabaseSerializable serializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
             final QueryConstructor queryConstructor = serializable.constructDeserializeQuery(column, value);
 
             return queryList(queryConstructor.query(), queryConstructor::statement, resultSet -> {
@@ -94,7 +97,7 @@ public class DatabaseClient {
         }
     }
 
-    public void saveSerializable(final DatabaseSerializable serializable) {
+    public void saveSerializable(final AbstractDatabaseSerializable serializable) {
         final QueryConstructor queryConstructor = serializable.serialize();
         prepare(queryConstructor.query(), preparedStatement -> {
             try {

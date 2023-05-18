@@ -34,7 +34,7 @@ public class DeviceZServerApplication extends AbstractApplication {
             System.exit(1);
         }
 
-        databaseClient = new DatabaseClient(config.getStringOrDefault("mysql-hostname", "localhost"),
+        databaseClient = new DatabaseClient(this, config.getStringOrDefault("mysql-hostname", "localhost"),
                 config.getIntOrDefault("mysql-port", 3306), config.getStringOrDefault("mysql-database", "database"),
                 config.getStringOrDefault("mysql-username", "username"), config.getStringOrDefault("mysql-password", "password"));
 

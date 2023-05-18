@@ -1,5 +1,6 @@
 package de.devicez.agent;
 
+import com.google.common.net.InetAddresses;
 import de.devicez.agent.installer.AgentInstaller;
 import de.devicez.agent.networking.NetworkingClient;
 import de.devicez.agent.util.PlatformUtil;
@@ -10,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
