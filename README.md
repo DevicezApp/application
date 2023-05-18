@@ -6,6 +6,9 @@ The application source-code, containing both the agent (running on the client-si
 connected clients, while retaining all necessary information in a database. With it, the front-end application
 interacts.
 
+![grafik](https://github.com/DevicezApp/application/assets/38865194/076d3b09-2354-4915-927e-67c15b9ff178)
+*Sample output of the console interface*
+
 ## Goals of this project
 
 This is a free-time project. I'd like to create a completely open-source and free (as in freedom) device management
