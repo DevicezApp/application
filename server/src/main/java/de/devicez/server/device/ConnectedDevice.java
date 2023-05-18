@@ -37,7 +37,7 @@ public class ConnectedDevice extends Device {
         }
 
         if (update) {
-            getApplication().getDatabaseClient().saveSerializable(this);
+            getApplication().getDatabaseClient().save(this);
         }
     }
 

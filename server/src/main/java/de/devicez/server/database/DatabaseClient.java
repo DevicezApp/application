@@ -5,14 +5,12 @@ import com.zaxxer.hikari.HikariDataSource;
 import de.devicez.server.DeviceZServerApplication;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 @Slf4j
 public class DatabaseClient {
@@ -32,22 +30,29 @@ public class DatabaseClient {
         this.dataSource = new HikariDataSource(config);
     }
 
-    public <T> T query(final String query, final StatementModifier modifier, final ResultSetTransformer<T> consumer) {
+    public <T> T query(final String query, final PreparedStatementModifier modifier, final ResultSetTransformer<T> transformer) {
         try {
-            try (final Connection connection = dataSource.getConnection(); final PreparedStatement preparedStatement = connection.prepareStatement(query); final ResultSet resultSet = preparedStatement.executeQuery();) {
-                modifier.apply(preparedStatement);
-                return consumer.apply(resultSet);
+            try (final Connection connection = dataSource.getConnection(); final PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                if (modifier != null) {
+                    modifier.apply(preparedStatement);
+                }
+
+                try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next() ? transformer.apply(resultSet) : null;
+                }
             }
-        } catch (final SQLException e) {
+        } catch (final Exception e) {
             log.error("Error while executing database query", e);
             throw new DatabaseException(e);
         }
     }
 
-    public <T> List<T> queryList(final String query, final StatementModifier modifier, final ResultSetTransformer<T> consumer) {
+    public <T> List<T> queryList(final String query, final PreparedStatementModifier modifier, final ResultSetTransformer<T> consumer) {
         try {
             try (final Connection connection = dataSource.getConnection(); final PreparedStatement preparedStatement = connection.prepareStatement(query); final ResultSet resultSet = preparedStatement.executeQuery();) {
-                modifier.apply(preparedStatement);
+                if (modifier != null) {
+                    modifier.apply(preparedStatement);
+                }
 
                 final List<T> list = new ArrayList<>();
                 while (resultSet.next()) {
@@ -55,61 +60,50 @@ public class DatabaseClient {
                 }
                 return list;
             }
-        } catch (final SQLException e) {
+        } catch (final Exception e) {
             log.error("Error while executing database query", e);
             throw new DatabaseException(e);
         }
     }
 
-    public <T extends AbstractDatabaseSerializable> T readSerializable(final Class<T> clazz, final String column, final Object value) throws DatabaseException {
+    public <T extends AbstractDatabaseSerializable> T query(final Class<T> clazz, final ConstructedQuery query) throws DatabaseException {
         try {
             final AbstractDatabaseSerializable serializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
-            final QueryConstructor queryConstructor = serializable.constructDeserializeQuery(column, value);
-
-            return query(queryConstructor.query(), queryConstructor::statement, resultSet -> {
+            return query(query.query(), query::preparedStatement, resultSet -> {
                 serializable.deserialize(resultSet);
                 return (T) serializable;
             });
-        } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException |
-                       InvocationTargetException e) {
+        } catch (final Exception e) {
             log.error("Error while executing database query", e);
             throw new DatabaseException(e);
         }
     }
 
-    public <T extends AbstractDatabaseSerializable> List<T> readSerializableList(final Class<T> clazz) {
-        return readSerializableList(clazz, null, null);
+    public <T extends AbstractDatabaseSerializable> List<T> queryList(final Class<T> clazz, final ConstructedQuery query) throws DatabaseException {
+        return queryList(query.query(), query::preparedStatement, resultSet -> {
+            final AbstractDatabaseSerializable serializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
+            serializable.deserialize(resultSet);
+            return (T) serializable;
+        });
     }
 
-    public <T extends AbstractDatabaseSerializable> List<T> readSerializableList(final Class<T> clazz, final String column, final Object value) throws DatabaseException {
-        try {
-            final AbstractDatabaseSerializable globalSerializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
-            final QueryConstructor queryConstructor = globalSerializable.constructDeserializeQuery(column, value);
-
-            return queryList(queryConstructor.query(), queryConstructor::statement, resultSet -> {
-                final AbstractDatabaseSerializable serializable;
-                try {
-                    serializable = clazz.getDeclaredConstructor(DeviceZServerApplication.class).newInstance(application);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                         NoSuchMethodException e) {
-                    log.error("Error while executing database query", e);
-                    throw new RuntimeException(e);
-                }
-                serializable.deserialize(resultSet);
-                return (T) serializable;
-            });
-        } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException |
-                       InvocationTargetException e) {
-            log.error("Error while executing database query", e);
-            throw new DatabaseException(e);
-        }
-    }
-
-    public void saveSerializable(final AbstractDatabaseSerializable serializable) {
-        final QueryConstructor queryConstructor = serializable.serialize();
+    public void save(final AbstractDatabaseSerializable serializable) {
+        final ConstructedQuery queryConstructor = serializable.constructSaveQuery();
         prepare(queryConstructor.query(), preparedStatement -> {
             try {
-                return queryConstructor.statement(preparedStatement);
+                queryConstructor.preparedStatement(preparedStatement);
+            } catch (final SQLException e) {
+                log.error("Error while executing database query", e);
+                throw new DatabaseException(e);
+            }
+        });
+    }
+
+    public void delete(final AbstractDatabaseSerializable serializable) {
+        final ConstructedQuery queryConstructor = serializable.constructDeleteQuery();
+        prepare(queryConstructor.query(), preparedStatement -> {
+            try {
+                queryConstructor.preparedStatement(preparedStatement);
             } catch (final SQLException e) {
                 log.error("Error while executing database query", e);
                 throw new DatabaseException(e);
@@ -121,30 +115,28 @@ public class DatabaseClient {
         prepare(query, null);
     }
 
-    public void prepare(final String query, final Function<PreparedStatement, PreparedStatement> statementFunction) throws DatabaseException {
+    public void prepare(final String query, final PreparedStatementModifier modifier) throws DatabaseException {
         try {
             try (final Connection connection = dataSource.getConnection(); final PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                if (statementFunction == null) {
-                    preparedStatement.execute();
-                    return;
+                if (modifier != null) {
+                    modifier.apply(preparedStatement);
                 }
 
-                final PreparedStatement newStatement = statementFunction.apply(preparedStatement);
-                newStatement.execute();
+                preparedStatement.execute();
             }
-        } catch (final SQLException e) {
+        } catch (final Exception e) {
             log.error("Error while executing database query", e);
             throw new DatabaseException(e);
         }
     }
 
     @FunctionalInterface
-    public interface StatementModifier {
-        PreparedStatement apply(PreparedStatement preparedStatement) throws SQLException;
+    public interface PreparedStatementModifier {
+        void apply(PreparedStatement preparedStatement) throws Exception;
     }
 
     @FunctionalInterface
     public interface ResultSetTransformer<T> {
-        T apply(ResultSet resultSet) throws SQLException;
+        T apply(ResultSet resultSet) throws Exception;
     }
 }

@@ -38,7 +38,7 @@ public class DeviceRegistry {
         log.info("Device {} connected from {}", name, session.getRemoteAddress().toString());
 
         // Update information in database
-        application.getDatabaseClient().saveSerializable(newDevice);
+        application.getDatabaseClient().save(newDevice);
     }
 
     public void handleDeviceDisconnect(final long sessionId) {
@@ -51,7 +51,7 @@ public class DeviceRegistry {
         connectedDeviceIdMap.remove(device.getId());
 
         // Update information in database
-        application.getDatabaseClient().saveSerializable(device);
+        application.getDatabaseClient().save(device);
     }
 
     public void handleDeviceHeartbeat(final IStreamSession session, final HeartbeatPacket packet) {
@@ -59,17 +59,21 @@ public class DeviceRegistry {
         device.applyHeartbeat(packet);
     }
 
+    public ConnectedDevice getConnectedDeviceById(final UUID id) {
+        return connectedDeviceIdMap.get(id);
+    }
+
     public Device getDeviceById(final UUID id) {
-        final ConnectedDevice connectedDevice = connectedDeviceIdMap.get(id);
+        final ConnectedDevice connectedDevice = getConnectedDeviceById(id);
         if (connectedDevice != null) {
             return connectedDevice;
         }
 
-        return application.getDatabaseClient().readSerializable(Device.class, "id", id);
+        return application.getDatabaseClient().query(Device.class, Device.QUERY_ID.apply(id));
     }
 
     public Collection<Device> getAllDevices() {
-        final List<Device> devices = application.getDatabaseClient().readSerializableList(Device.class);
+        final List<Device> devices = application.getDatabaseClient().queryList(Device.class, Device.QUERY_ALL);
         devices.removeIf(device -> {
             for (final ConnectedDevice connectedDevice : connectedDeviceSessionMap.values()) {
                 if (connectedDevice.getId().equals(device.getId())) {

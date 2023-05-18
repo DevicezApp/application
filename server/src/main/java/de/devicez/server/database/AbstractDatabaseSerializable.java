@@ -13,9 +13,9 @@ public abstract class AbstractDatabaseSerializable {
         this.application = application;
     }
 
-    public abstract QueryConstructor serialize();
+    public abstract ConstructedQuery constructSaveQuery();
 
-    public abstract QueryConstructor constructDeserializeQuery(String column, Object value);
+    public abstract ConstructedQuery constructDeleteQuery();
 
     public abstract void deserialize(ResultSet resultSet) throws SQLException;
 
