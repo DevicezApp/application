@@ -74,7 +74,7 @@ public class DeviceCommand extends AbstractCommandHandler {
 
     @Override
     public String getDescription() {
-        return "Manage all connected devices.";
+        return "Manage all available devices.";
     }
 
     private String formatLastSeen(final Device device) {
