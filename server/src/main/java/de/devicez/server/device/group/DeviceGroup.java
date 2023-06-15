@@ -1,9 +1,11 @@
 package de.devicez.server.device.group;
 
+import de.devicez.common.packet.server.ShutdownPacket;
 import de.devicez.server.DeviceZServerApplication;
 import de.devicez.server.database.AbstractDatabaseSerializable;
 import de.devicez.server.database.ConstructedQuery;
 import de.devicez.server.database.ParameterConstructedQuerySupplier;
+import de.devicez.server.device.ConnectedDevice;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -100,6 +102,38 @@ public class DeviceGroup extends AbstractDatabaseSerializable {
 
     public void delete() {
         getApplication().getDatabaseClient().delete(this);
+    }
+
+    public void shutdown(final int delay, final boolean force, final String message) {
+        getApplication().getDeviceGroupRegistry().getGroupMemberDevices(getId()).forEach(device -> {
+            if (device instanceof ConnectedDevice connectedDevice) {
+                connectedDevice.shutdown(delay, force, message);
+            }
+        });
+    }
+
+    public void restart(final int delay, final boolean force, final String message) {
+        getApplication().getDeviceGroupRegistry().getGroupMemberDevices(getId()).forEach(device -> {
+            if (device instanceof ConnectedDevice connectedDevice) {
+                connectedDevice.restart(delay, force, message);
+            }
+        });
+    }
+
+    public void cancelShutdown(final String message) {
+        getApplication().getDeviceGroupRegistry().getGroupMemberDevices(getId()).forEach(device -> {
+            if (device instanceof ConnectedDevice connectedDevice) {
+                connectedDevice.cancelShutdown(message);
+            }
+        });
+    }
+
+    public void wakeUp() {
+        getApplication().getDeviceGroupRegistry().getGroupMemberDevices(getId()).forEach(device -> {
+            if (device instanceof ConnectedDevice) return;
+
+            device.wakeUp();
+        });
     }
 
     public UUID getId() {

@@ -122,7 +122,9 @@ public class Device extends AbstractDatabaseSerializable {
     public void wakeUp() {
         try {
             final InetAddress broadcastAddress = NetworkUtil.getBroadcastAddress();
-            NetworkUtil.sendMagicPaket(broadcastAddress, getMacAddress());
+            byte[] hardwareAddress = getMacAddress();
+            NetworkUtil.sendMagicPaket(broadcastAddress, hardwareAddress);
+            log.info("Sent wakeup packet to '{}' with params 'broadcastAddress={},mac={}'", getName(), broadcastAddress, NetworkUtil.formatHardwareAddress(hardwareAddress));
         } catch (final IOException e) {
             log.error("Error while waking up device", e);
         }

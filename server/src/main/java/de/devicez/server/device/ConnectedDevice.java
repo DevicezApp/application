@@ -43,14 +43,17 @@ public class ConnectedDevice extends Device {
 
     public void shutdown(final int delay, final boolean force, final String message) {
         session.writenf(new ShutdownPacket(false, force, delay, message));
+        log.info("Sent shutdown to '{}' with params 'delay={},force={},message={}'", getName(), delay, force, message);
     }
 
     public void restart(final int delay, final boolean force, final String message) {
         session.writenf(new ShutdownPacket(true, force, delay, message));
+        log.info("Sent restart to '{}' with params 'delay={},force={},message={}'", getName(), delay, force, message);
     }
 
     public void cancelShutdown(final String message) {
         session.writenf(new ShutdownCancelPacket(message));
+        log.info("Sent shutdown cancellation to '{}' with params 'message={}'", getName(), message);
     }
 
     @Override

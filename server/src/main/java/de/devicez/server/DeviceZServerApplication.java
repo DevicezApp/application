@@ -8,6 +8,7 @@ import de.devicez.server.device.DeviceRegistry;
 import de.devicez.server.device.group.DeviceGroupRegistry;
 import de.devicez.server.http.HTTPServer;
 import de.devicez.server.networking.NetworkingServer;
+import de.devicez.server.task.TaskRegistry;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -21,6 +22,7 @@ public class DeviceZServerApplication extends AbstractApplication {
     private DatabaseClient databaseClient;
     private DeviceRegistry deviceRegistry;
     private DeviceGroupRegistry deviceGroupRegistry;
+    private TaskRegistry taskRegistry;
     private NetworkingServer networkingServer;
     private HTTPServer httpServer;
 
@@ -41,6 +43,8 @@ public class DeviceZServerApplication extends AbstractApplication {
 
         deviceRegistry = new DeviceRegistry(this);
         deviceGroupRegistry = new DeviceGroupRegistry(this);
+
+        taskRegistry = new TaskRegistry(this);
 
         networkingServer = new NetworkingServer(this, config.getIntOrDefault("networking-port", 1337));
         httpServer = new HTTPServer(config.getIntOrDefault("http-port", 8080), config.getString("api-key"));
@@ -69,6 +73,10 @@ public class DeviceZServerApplication extends AbstractApplication {
 
     public DeviceGroupRegistry getDeviceGroupRegistry() {
         return deviceGroupRegistry;
+    }
+
+    public TaskRegistry getTaskRegistry() {
+        return taskRegistry;
     }
 
     public NetworkingServer getNetworkingServer() {
