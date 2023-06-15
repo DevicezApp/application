@@ -56,8 +56,28 @@ public class DeviceRegistry {
         device.applyHeartbeat(packet);
     }
 
+    public ConnectedDevice getConnectedDeviceByIdOrName(final String identifier) {
+        try {
+            return getConnectedDeviceById(UUID.fromString(identifier));
+        } catch (final IllegalArgumentException e) {
+            return getConnectedDeviceByName(identifier);
+        }
+    }
+
     public ConnectedDevice getConnectedDeviceById(final UUID id) {
         return connectedDeviceIdMap.get(id);
+    }
+
+    public ConnectedDevice getConnectedDeviceByName(final String name) {
+        return connectedDeviceIdMap.values().stream().filter(it -> it.getName().equals(name)).findAny().orElse(null);
+    }
+
+    public Device getDeviceByIdOrName(final String identifier) {
+        try {
+            return getDeviceById(UUID.fromString(identifier));
+        } catch (final IllegalArgumentException e) {
+            return getDeviceByName(identifier);
+        }
     }
 
     public Device getDeviceById(final UUID id) {
@@ -67,6 +87,15 @@ public class DeviceRegistry {
         }
 
         return application.getDatabaseClient().query(Device.class, Device.SELECT_ID.apply(id));
+    }
+
+    public Device getDeviceByName(final String name) {
+        final ConnectedDevice connectedDevice = getConnectedDeviceByName(name);
+        if (connectedDevice != null) {
+            return connectedDevice;
+        }
+
+        return application.getDatabaseClient().query(Device.class, Device.SELECT_NAME.apply(name));
     }
 
     public Collection<Device> getAllDevices() {

@@ -58,12 +58,10 @@ public class DeviceCommand extends AbstractCommandHandler {
                 return;
             } else if (args[0].equalsIgnoreCase("shutdown")) {
                 if (args.length >= 4) {
-                    UUID deviceId;
                     int delay;
                     boolean force;
                     final StringBuilder message = new StringBuilder();
                     try {
-                        deviceId = UUID.fromString(args[1]);
                         delay = Integer.parseInt(args[2]);
                         force = Boolean.parseBoolean(args[3]);
                         for (int i = 4; i < args.length; i++) {
@@ -72,14 +70,11 @@ public class DeviceCommand extends AbstractCommandHandler {
                     } catch (final NumberFormatException e) {
                         log.error("Invalid <delay> given.");
                         return;
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <deviceId> given.");
-                        return;
                     }
 
-                    final ConnectedDevice device = getApplication().getDeviceRegistry().getConnectedDeviceById(deviceId);
+                    final ConnectedDevice device = getApplication().getDeviceRegistry().getConnectedDeviceByIdOrName(args[1]);
                     if (device == null) {
-                        log.error("No device found with given id, or is offline.");
+                        log.error("No device found with given id or name, or is offline.");
                         return;
                     }
 
@@ -92,12 +87,10 @@ public class DeviceCommand extends AbstractCommandHandler {
                 return;
             } else if (args[0].equalsIgnoreCase("restart")) {
                 if (args.length >= 4) {
-                    UUID deviceId;
                     int delay;
                     boolean force;
                     final StringBuilder message = new StringBuilder();
                     try {
-                        deviceId = UUID.fromString(args[1]);
                         delay = Integer.parseInt(args[2]);
                         force = Boolean.parseBoolean(args[3]);
                         for (int i = 4; i < args.length; i++) {
@@ -106,14 +99,11 @@ public class DeviceCommand extends AbstractCommandHandler {
                     } catch (final NumberFormatException e) {
                         log.error("Invalid <delay> given.");
                         return;
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <deviceId> given.");
-                        return;
                     }
 
-                    final ConnectedDevice device = getApplication().getDeviceRegistry().getConnectedDeviceById(deviceId);
+                    final ConnectedDevice device = getApplication().getDeviceRegistry().getConnectedDeviceByIdOrName(args[1]);
                     if (device == null) {
-                        log.error("No device found with given id, or is offline.");
+                        log.error("No device found with given id or name, or is offline.");
                         return;
                     }
 
@@ -126,19 +116,12 @@ public class DeviceCommand extends AbstractCommandHandler {
                 return;
             } else if (args[0].equalsIgnoreCase("cancelshutdown") || args[0].equalsIgnoreCase("cancelrestart")) {
                 if (args.length >= 2) {
-                    UUID deviceId;
                     final StringBuilder message = new StringBuilder();
-                    try {
-                        deviceId = UUID.fromString(args[1]);
-                        for (int i = 2; i < args.length; i++) {
-                            message.append(args[i]).append(" ");
-                        }
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <deviceId> given.");
-                        return;
+                    for (int i = 2; i < args.length; i++) {
+                        message.append(args[i]).append(" ");
                     }
 
-                    final ConnectedDevice device = getApplication().getDeviceRegistry().getConnectedDeviceById(deviceId);
+                    final ConnectedDevice device = getApplication().getDeviceRegistry().getConnectedDeviceByIdOrName(args[1]);
                     if (device == null) {
                         log.error("No device found with given id, or is offline.");
                         return;
@@ -152,15 +135,7 @@ public class DeviceCommand extends AbstractCommandHandler {
                 log.info("Usage: device cancelshutdown/cancelrestart <deviceId> [message]");
             } else if (args[0].equalsIgnoreCase("wake")) {
                 if (args.length == 2) {
-                    UUID deviceId;
-                    try {
-                        deviceId = UUID.fromString(args[1]);
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <deviceId> given.");
-                        return;
-                    }
-
-                    final Device device = getApplication().getDeviceRegistry().getDeviceById(deviceId);
+                    final Device device = getApplication().getDeviceRegistry().getDeviceByIdOrName(args[1]);
                     if (device instanceof ConnectedDevice) {
                         log.error("Device is already awake.");
                         return;

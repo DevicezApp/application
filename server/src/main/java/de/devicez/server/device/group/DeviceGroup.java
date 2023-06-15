@@ -35,6 +35,18 @@ public class DeviceGroup extends AbstractDatabaseSerializable {
         }
     };
 
+    public static ParameterConstructedQuerySupplier<String> SELECT_NAME = name -> new ConstructedQuery() {
+        @Override
+        public String query() {
+            return "SELECT * FROM devicez_devicegroups WHERE name = ?";
+        }
+
+        @Override
+        public void preparedStatement(final PreparedStatement statement) throws SQLException {
+            statement.setString(1, name);
+        }
+    };
+
     private UUID id;
     private String name;
 

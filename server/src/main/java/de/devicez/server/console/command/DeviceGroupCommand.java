@@ -53,21 +53,13 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 log.info("Usage: devicegroup list");
             } else if (args[0].equalsIgnoreCase("listdevices")) {
                 if (args.length == 2) {
-                    UUID groupId;
-                    try {
-                        groupId = UUID.fromString(args[1]);
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <groupId> given.");
-                        return;
-                    }
-
-                    final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupById(groupId);
+                    final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupByIdOrName(args[1]);
                     if (group == null) {
                         log.error("Group not found.");
                         return;
                     }
 
-                    final List<Device> devices = getApplication().getDeviceGroupRegistry().getGroupMemberDevices(groupId);
+                    final List<Device> devices = getApplication().getDeviceGroupRegistry().getGroupMemberDevices(group.getId());
 
                     log.info("Devices in group {} ({}):", group.getName(), devices.size());
 
@@ -81,15 +73,7 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 log.info("Usage: devicegroup listdevices <groupId>");
             } else if (args[0].equalsIgnoreCase("delete")) {
                 if (args.length == 2) {
-                    UUID groupId;
-                    try {
-                        groupId = UUID.fromString(args[1]);
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <groupId> given.");
-                        return;
-                    }
-
-                    final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupById(groupId);
+                    final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupByIdOrName(args[1]);
                     if (group == null) {
                         log.error("Group not found.");
                         return;
@@ -103,35 +87,19 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 log.info("Usage: devicegroup delete <id>");
             } else if (args[0].equalsIgnoreCase("add")) {
                 if (args.length == 3) {
-                    UUID deviceId;
-                    try {
-                        deviceId = UUID.fromString(args[1]);
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <deviceId> given.");
-                        return;
-                    }
-
-                    UUID groupId;
-                    try {
-                        groupId = UUID.fromString(args[2]);
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <groupId> given.");
-                        return;
-                    }
-
-                    final Device device = getApplication().getDeviceRegistry().getDeviceById(deviceId);
+                    final Device device = getApplication().getDeviceRegistry().getDeviceByIdOrName(args[1]);
                     if (device == null) {
                         log.error("Device not found.");
                         return;
                     }
 
-                    final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupById(groupId);
+                    final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupByIdOrName(args[2]);
                     if (group == null) {
                         log.error("Group not found.");
                         return;
                     }
 
-                    getApplication().getDeviceGroupRegistry().addDevice(deviceId, groupId);
+                    getApplication().getDeviceGroupRegistry().addDevice(device.getId(), group.getId());
                     log.info("Added {} to group {}", device.getName(), group.getName());
                     return;
                 }
@@ -139,35 +107,19 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 log.info("Usage: devicegroup add <deviceId> <groupId>");
             } else if (args[0].equalsIgnoreCase("remove")) {
                 if (args.length == 3) {
-                    UUID deviceId;
-                    try {
-                        deviceId = UUID.fromString(args[1]);
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <deviceId> given.");
-                        return;
-                    }
-
-                    UUID groupId;
-                    try {
-                        groupId = UUID.fromString(args[2]);
-                    } catch (final IllegalArgumentException e) {
-                        log.error("Invalid <groupId> given.");
-                        return;
-                    }
-
-                    final Device device = getApplication().getDeviceRegistry().getDeviceById(deviceId);
+                    final Device device = getApplication().getDeviceRegistry().getDeviceByIdOrName(args[1]);
                     if (device == null) {
                         log.error("Device not found.");
                         return;
                     }
 
-                    final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupById(groupId);
+                    final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupByIdOrName(args[2]);
                     if (group == null) {
                         log.error("Group not found.");
                         return;
                     }
 
-                    getApplication().getDeviceGroupRegistry().removeDevice(deviceId, groupId);
+                    getApplication().getDeviceGroupRegistry().removeDevice(device.getId(), group.getId());
                     log.info("Removed {} from group {}", device.getName(), group.getName());
                     return;
                 }

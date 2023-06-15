@@ -32,8 +32,20 @@ public class DeviceGroupRegistry {
         application.getDatabaseClient().delete(query);
     }
 
+    public DeviceGroup getGroupByIdOrName(final String identifier) {
+        try {
+            return getGroupById(UUID.fromString(identifier));
+        } catch (final IllegalArgumentException e) {
+            return getGroupByName(identifier);
+        }
+    }
+
     public DeviceGroup getGroupById(final UUID id) {
         return application.getDatabaseClient().query(DeviceGroup.class, DeviceGroup.SELECT_ID.apply(id));
+    }
+
+    public DeviceGroup getGroupByName(final String name) {
+        return application.getDatabaseClient().query(DeviceGroup.class, DeviceGroup.SELECT_NAME.apply(name));
     }
 
     public List<Device> getGroupMemberDevices(final UUID id) {
