@@ -1,5 +1,6 @@
 package de.devicez.server;
 
+import com.google.gson.Gson;
 import de.devicez.common.application.AbstractApplication;
 import de.devicez.common.application.config.ApplicationConfig;
 import de.devicez.server.console.ServerConsole;
@@ -17,6 +18,7 @@ import java.io.IOException;
 @Slf4j
 public class DeviceZServerApplication extends AbstractApplication {
 
+    private final Gson gson = new Gson();
     private ApplicationConfig config;
 
     private DatabaseClient databaseClient;
@@ -57,6 +59,10 @@ public class DeviceZServerApplication extends AbstractApplication {
     public void shutdown() throws Exception {
         networkingServer.close();
         httpServer.close();
+    }
+
+    public Gson getGson() {
+        return gson;
     }
 
     public ApplicationConfig getConfig() {

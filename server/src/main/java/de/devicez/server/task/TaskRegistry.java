@@ -68,6 +68,27 @@ public class TaskRegistry {
         return task;
     }
 
+    public void deleteTask(final Task task) {
+        taskMap.remove(task.getId());
+        application.getDatabaseClient().delete(task);
+    }
+
+    public Task getTaskByIdOrName(final String identifier) {
+        try {
+            return getTaskById(UUID.fromString(identifier));
+        } catch (final IllegalArgumentException e) {
+            return getTaskByName(identifier);
+        }
+    }
+
+    public Task getTaskById(final UUID id) {
+        return taskMap.get(id);
+    }
+
+    public Task getTaskByName(final String name) {
+        return taskMap.values().stream().filter(task -> task.getName().equals(name)).findAny().orElse(null);
+    }
+
     public Collection<Task> getTasks() {
         return taskMap.values();
     }

@@ -133,6 +133,7 @@ public class DeviceCommand extends AbstractCommandHandler {
                 }
 
                 log.info("Usage: device cancelshutdown/cancelrestart <deviceId> [message]");
+                return;
             } else if (args[0].equalsIgnoreCase("wake")) {
                 if (args.length == 2) {
                     final Device device = getApplication().getDeviceRegistry().getDeviceByIdOrName(args[1]);
@@ -147,6 +148,7 @@ public class DeviceCommand extends AbstractCommandHandler {
                 }
 
                 log.info("Usage: device wake <deviceId>");
+                return;
             }
         }
 

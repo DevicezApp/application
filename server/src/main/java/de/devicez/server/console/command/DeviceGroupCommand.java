@@ -33,6 +33,7 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 }
 
                 log.info("Usage: devicegroup create <name>");
+                return;
             } else if (args[0].equalsIgnoreCase("list")) {
                 if (args.length == 1) {
                     final Collection<DeviceGroup> groups = getApplication().getDeviceGroupRegistry().getGroups();
@@ -51,6 +52,7 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 }
 
                 log.info("Usage: devicegroup list");
+                return;
             } else if (args[0].equalsIgnoreCase("listdevices")) {
                 if (args.length == 2) {
                     final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupByIdOrName(args[1]);
@@ -71,6 +73,7 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 }
 
                 log.info("Usage: devicegroup listdevices <groupId>");
+                return;
             } else if (args[0].equalsIgnoreCase("delete")) {
                 if (args.length == 2) {
                     final DeviceGroup group = getApplication().getDeviceGroupRegistry().getGroupByIdOrName(args[1]);
@@ -85,6 +88,7 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 }
 
                 log.info("Usage: devicegroup delete <id>");
+                return;
             } else if (args[0].equalsIgnoreCase("add")) {
                 if (args.length == 3) {
                     final Device device = getApplication().getDeviceRegistry().getDeviceByIdOrName(args[1]);
@@ -105,6 +109,7 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 }
 
                 log.info("Usage: devicegroup add <deviceId> <groupId>");
+                return;
             } else if (args[0].equalsIgnoreCase("remove")) {
                 if (args.length == 3) {
                     final Device device = getApplication().getDeviceRegistry().getDeviceByIdOrName(args[1]);
@@ -125,6 +130,7 @@ public class DeviceGroupCommand extends AbstractCommandHandler {
                 }
 
                 log.info("Usage: devicegroup remove <deviceId> <groupId>");
+                return;
             }
         }
 

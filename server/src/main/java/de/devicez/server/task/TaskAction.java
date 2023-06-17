@@ -1,26 +1,27 @@
 package de.devicez.server.task;
 
-import de.devicez.server.device.ConnectedDevice;
-import de.devicez.server.device.Device;
 import de.devicez.server.device.group.DeviceGroup;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 public enum TaskAction {
 
     GROUP_WAKE((app, task) -> {
-        final DeviceGroup group = app.getDeviceGroupRegistry().getGroupById(UUID.fromString(task.getTarget()));
+        final WakeTaskPayload payload = task.getParsedPayload(WakeTaskPayload.class);
+        final DeviceGroup group = app.getDeviceGroupRegistry().getGroupById(payload.getId());
         group.wakeUp();
     }), GROUP_SHUTDOWN((app, task) -> {
-        final DeviceGroup group = app.getDeviceGroupRegistry().getGroupById(UUID.fromString(task.getTarget()));
-        // TODO add possibility to define these variables
-        group.shutdown(1, true, "Automated shutdown");
+        final ShutdownAndRestartTaskPayload payload = task.getParsedPayload(ShutdownAndRestartTaskPayload.class);
+        final DeviceGroup group = app.getDeviceGroupRegistry().getGroupById(payload.getId());
+        group.shutdown(payload.getDelay(), payload.isForce(), payload.getMessage());
     }), GROUP_RESTART((app, task) -> {
-        final DeviceGroup group = app.getDeviceGroupRegistry().getGroupById(UUID.fromString(task.getTarget()));
-        // TODO add possibility to define these variables
-        group.restart(1, true, "Automated restart");
-    });;
+        final ShutdownAndRestartTaskPayload payload = task.getParsedPayload(ShutdownAndRestartTaskPayload.class);
+        final DeviceGroup group = app.getDeviceGroupRegistry().getGroupById(payload.getId());
+        group.restart(payload.getDelay(), payload.isForce(), payload.getMessage());
+    });
 
     private final TaskActionFunction function;
 
@@ -30,5 +31,22 @@ public enum TaskAction {
 
     public TaskActionFunction getFunction() {
         return function;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    public static class WakeTaskPayload {
+        private UUID id;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    public static class ShutdownAndRestartTaskPayload {
+        private UUID id;
+        private int delay;
+        private boolean force;
+        private String message;
     }
 }

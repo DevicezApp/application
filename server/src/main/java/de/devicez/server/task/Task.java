@@ -18,6 +18,7 @@ import java.util.UUID;
 
 public class Task extends AbstractDatabaseSerializable {
 
+
     private static final CronParser PARSER = new CronParser(CronDefinitionBuilder.instanceDefinitionFor(CronType.UNIX));
 
     public static ConstructedQuery SELECT_ALL = new ConstructedQuery() {
@@ -35,20 +36,20 @@ public class Task extends AbstractDatabaseSerializable {
     private String name;
     private Cron cron;
     private TaskAction action;
-    private String target;
+    private String payload;
     private Timestamp lastExecution;
 
     public Task(final DeviceZServerApplication application) {
         super(application);
     }
 
-    public Task(final DeviceZServerApplication application, final UUID id, final String name, final String cronExpression, final TaskAction action, final String target, final Timestamp lastExecution) {
+    public Task(final DeviceZServerApplication application, final UUID id, final String name, final String cronExpression, final TaskAction action, final String payload, final Timestamp lastExecution) {
         super(application);
         this.id = id;
         this.name = name;
         this.cron = PARSER.parse(cronExpression);
         this.action = action;
-        this.target = target;
+        this.payload = payload;
         this.lastExecution = lastExecution;
     }
 
@@ -57,7 +58,7 @@ public class Task extends AbstractDatabaseSerializable {
         return new ConstructedQuery() {
             @Override
             public String query() {
-                return "INSERT INTO devicez_tasks (id, name, cron, action, target, last_execution) VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE name=?,cron=?,action=?,target=?,last_execution=?";
+                return "INSERT INTO devicez_tasks (id, name, cron, action, payload, last_execution) VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE name=?,cron=?,action=?,payload=?,last_execution=?";
             }
 
             @Override
@@ -66,13 +67,13 @@ public class Task extends AbstractDatabaseSerializable {
                 statement.setString(2, name);
                 statement.setString(3, cron.asString());
                 statement.setString(4, action.name());
-                statement.setString(5, target);
+                statement.setString(5, payload);
                 statement.setTimestamp(6, lastExecution);
 
                 statement.setString(7, name);
                 statement.setString(8, cron.asString());
                 statement.setString(9, action.name());
-                statement.setString(10, target);
+                statement.setString(10, payload);
                 statement.setTimestamp(11, lastExecution);
             }
         };
@@ -99,7 +100,11 @@ public class Task extends AbstractDatabaseSerializable {
         name = resultSet.getString("name");
         cron = PARSER.parse(resultSet.getString("cron"));
         action = TaskAction.valueOf(resultSet.getString("action"));
-        target = resultSet.getString("target");
+        payload = resultSet.getString("payload");
+    }
+
+    public void delete() {
+        getApplication().getTaskRegistry().deleteTask(this);
     }
 
     public UUID getId() {
@@ -130,12 +135,16 @@ public class Task extends AbstractDatabaseSerializable {
         this.action = action;
     }
 
-    public String getTarget() {
-        return target;
+    public String getPayload() {
+        return payload;
     }
 
-    public void setTarget(final String target) {
-        this.target = target;
+    public <T> T getParsedPayload(final Class<T> clazz) {
+        return getApplication().getGson().fromJson(payload, clazz);
+    }
+
+    public void setPayload(final String payload) {
+        this.payload = payload;
     }
 
     public Timestamp getLastExecution() {

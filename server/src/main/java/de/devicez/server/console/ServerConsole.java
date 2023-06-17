@@ -2,6 +2,7 @@ package de.devicez.server.console;
 
 import de.devicez.server.DeviceZServerApplication;
 import de.devicez.server.console.command.*;
+import de.devicez.server.task.Task;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -18,6 +19,7 @@ public class ServerConsole {
     }
 
     private void registerCommandHandlers() {
+        commandHandlerMap.put("task", new TaskCommand(application));
         commandHandlerMap.put("device", new DeviceCommand(application));
         commandHandlerMap.put("devicegroup", new DeviceGroupCommand(application));
         commandHandlerMap.put("help", new HelpCommand(application));

@@ -41,6 +41,11 @@ public class DeviceRegistry {
     public void handleDeviceDisconnect(final long sessionId) {
         // Remove from session map
         final ConnectedDevice device = connectedDeviceSessionMap.remove(sessionId);
+        if (device == null) {
+            log.warn("Weird connection aborted. ('sessionId={}')", sessionId);
+            return;
+        }
+
         device.setLastSeen(new Timestamp(System.currentTimeMillis()));
         log.info("Device {} disconnected", device.getName());
 
