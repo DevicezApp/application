@@ -89,6 +89,6 @@ public class TaskCommand extends AbstractCommandHandler {
 
     @Override
     public String getDescription() {
-        return "Manage device groups.";
+        return "Manage automated tasks.";
     }
 }
