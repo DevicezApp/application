@@ -94,7 +94,8 @@ public class AgentInstaller {
         // Copy executable into application folder
         final File executable = new File(AgentInstaller.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         final Path targetPath = new File(application.getApplicationFolder(), "DeviceZAgent.jar").toPath();
-        Files.copy(executable.toPath(), targetPath);
+        Files.copy(executable.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
 
         // Platform specific installation
         switch (application.getPlatform()) {
@@ -109,17 +110,17 @@ public class AgentInstaller {
                     Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.xml").toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
 
-                // Register service
-                final Process installProcess = new ProcessBuilder("cmd", "/c", "DeviceZService.exe", "install")
-                        .directory(application.getApplicationFolder())
-                        .start();
+                // Copy run script
+                try (final InputStream inputStream = AgentInstaller.class.getResource("/windows/DeviceZAgent.bat").openStream()) {
+                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZAgent.bat").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
 
+                // Register service
+                final Process installProcess = new ProcessBuilder("cmd", "/c", "DeviceZService.exe", "install").directory(application.getApplicationFolder()).start();
                 installProcess.waitFor();
 
                 // Run service
-                new ProcessBuilder("cmd", "/c", "DeviceZService.exe", "start")
-                        .directory(application.getApplicationFolder())
-                        .start();
+                new ProcessBuilder("cmd", "/c", "DeviceZService.exe", "start").directory(application.getApplicationFolder()).start();
             }
             case LINUX -> {
                 // Copy service
@@ -127,21 +128,18 @@ public class AgentInstaller {
                     Files.copy(inputStream, new File("/etc/systemd/system/devicez.service").toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
 
-                final Process reloadProcess = new ProcessBuilder("systemctl", "daemon-reload")
-                        .directory(application.getApplicationFolder())
-                        .start();
+                // Copy run script
+                try (final InputStream inputStream = AgentInstaller.class.getResource("/linux/DeviceZAgent.sh").openStream()) {
+                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZAgent.sh").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
 
+                final Process reloadProcess = new ProcessBuilder("systemctl", "daemon-reload").directory(application.getApplicationFolder()).start();
                 reloadProcess.waitFor();
 
-                final Process enableProcess = new ProcessBuilder("systemctl", "enable", "devicez")
-                        .directory(application.getApplicationFolder())
-                        .start();
-
+                final Process enableProcess = new ProcessBuilder("systemctl", "enable", "devicez").directory(application.getApplicationFolder()).start();
                 enableProcess.waitFor();
 
-                new ProcessBuilder("systemctl", "start", "devicez")
-                        .directory(application.getApplicationFolder())
-                        .start();
+                new ProcessBuilder("systemctl", "start", "devicez").directory(application.getApplicationFolder()).start();
             }
         }
     }

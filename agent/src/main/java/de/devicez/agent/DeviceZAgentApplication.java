@@ -1,8 +1,8 @@
 package de.devicez.agent;
 
-import com.google.common.net.InetAddresses;
 import de.devicez.agent.installer.AgentInstaller;
 import de.devicez.agent.networking.NetworkingClient;
+import de.devicez.agent.updater.AgentUpdater;
 import de.devicez.agent.util.PlatformUtil;
 import de.devicez.common.application.AbstractApplication;
 import de.devicez.common.application.Platform;
@@ -11,14 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
 @Slf4j
 public class DeviceZAgentApplication extends AbstractApplication {
+
+    private static final double CURRENT_VERSION = 0.1;
 
     private ApplicationConfig config;
     private NetworkingClient networkingClient;
@@ -72,7 +72,30 @@ public class DeviceZAgentApplication extends AbstractApplication {
             throw new IllegalStateException("not a daemon user");
         }
 
+        if (AgentUpdater.isUpdateExecutable()) {
+            log.info("This is a update executable. Let's finish it!");
+            AgentUpdater.finishUpdate(this);
+            return;
+        } else {
+            AgentUpdater.clearWorkingDirectory(this);
+        }
+
+        // We are running as daemon user, so check updates now
+        final String updateDownloadURL = AgentUpdater.checkForUpdate(CURRENT_VERSION);
+        if (updateDownloadURL != null) {
+            log.info("There is a new version available! ({})", updateDownloadURL);
+
+            if (config.getBooleanOrDefault("autoUpdate", true)) {
+                log.info("Updating...");
+                AgentUpdater.startUpdate(this, updateDownloadURL);
+                return;
+            } else {
+                log.info("Auto-update is disabled! Ignoring update.");
+            }
+        }
+
         final int serverPort = config.getIntOrDefault("port", 1337);
+        log.info("DeviceZ Agent - v" + CURRENT_VERSION);
         log.info("I am {} with client id {}", hostname, clientId);
         log.info("Running as user: {}", PlatformUtil.getUsername());
 
