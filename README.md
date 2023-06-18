@@ -30,11 +30,11 @@ free to contact me!**
 
 Besides questions of user interface, I'd like to achieve the following as a first milestone:
 
-- starting / restarting / stopping machines remotely
+- ~~starting / restarting / stopping machines remotely~~
     - starting machines remotely would obviously be achieved via wake-on-lan. In a perfect world, the software would
       utilize other running clients in the same network to startup clients unreachable from the servers network
+- ~~task scheduler allowing actions to be triggered automatically~~
 - run server-side predefined scripts on machines remotely (e. g. windows updates)
-- task scheduler allowing actions to be triggered automatically
 
 ## Kudos
 
