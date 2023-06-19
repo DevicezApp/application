@@ -44,3 +44,4 @@ here:
 - [snf4j](https://github.com/snf4j/snf4j) – Provides an awesome and perfectly simple TCP networking library
 - [Javalin](https://github.com/javalin/javalin) – A lightweight and easy-to-use HTTP server, perfect for REST-APIs
 - [cron-utils](https://github.com/jmrozanec/cron-utils) - A simple utility for parsing crontab expressions
+- [bcrypt](https://github.com/patrickfav/bcrypt) - A utility for hashing password using BCrypt algorithm

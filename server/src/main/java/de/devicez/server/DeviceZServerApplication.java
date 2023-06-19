@@ -3,6 +3,7 @@ package de.devicez.server;
 import com.google.gson.Gson;
 import de.devicez.common.application.AbstractApplication;
 import de.devicez.common.application.config.ApplicationConfig;
+import de.devicez.common.model.ServerInformation;
 import de.devicez.server.console.ServerConsole;
 import de.devicez.server.database.DatabaseClient;
 import de.devicez.server.device.DeviceRegistry;
@@ -10,6 +11,7 @@ import de.devicez.server.device.group.DeviceGroupRegistry;
 import de.devicez.server.http.HTTPServer;
 import de.devicez.server.networking.NetworkingServer;
 import de.devicez.server.task.TaskRegistry;
+import de.devicez.server.user.UserRegistry;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -20,11 +22,13 @@ public class DeviceZServerApplication extends AbstractApplication {
 
     private final Gson gson = new Gson();
     private ApplicationConfig config;
+    private ServerInformation information;
 
     private DatabaseClient databaseClient;
     private DeviceRegistry deviceRegistry;
     private DeviceGroupRegistry deviceGroupRegistry;
     private TaskRegistry taskRegistry;
+    private UserRegistry userRegistry;
     private NetworkingServer networkingServer;
     private HTTPServer httpServer;
 
@@ -39,6 +43,11 @@ public class DeviceZServerApplication extends AbstractApplication {
             System.exit(1);
         }
 
+        information = new ServerInformation(config.getStringOrDefault("information-organisation-name", "DeviceZ"),
+                config.getStringOrDefault("information-organisation-url", "https://devicez.de"),
+                config.getStringOrDefault("information-frontend", "https://demo.devicez.de"),
+                config.getBooleanOrDefault("information-registration", true));
+
         databaseClient = new DatabaseClient(this, config.getStringOrDefault("mysql-hostname", "localhost"),
                 config.getIntOrDefault("mysql-port", 3306), config.getStringOrDefault("mysql-database", "database"),
                 config.getStringOrDefault("mysql-username", "username"), config.getStringOrDefault("mysql-password", "password"));
@@ -47,9 +56,10 @@ public class DeviceZServerApplication extends AbstractApplication {
         deviceGroupRegistry = new DeviceGroupRegistry(this);
 
         taskRegistry = new TaskRegistry(this);
+        userRegistry = new UserRegistry(this);
 
         networkingServer = new NetworkingServer(this, config.getIntOrDefault("networking-port", 1337));
-        httpServer = new HTTPServer(config.getIntOrDefault("http-port", 8080), config.getString("api-key"));
+        httpServer = new HTTPServer(this, config.getIntOrDefault("http-port", 8080));
 
         console = new ServerConsole(this);
         console.start();
@@ -69,6 +79,10 @@ public class DeviceZServerApplication extends AbstractApplication {
         return config;
     }
 
+    public ServerInformation getInformation() {
+        return information;
+    }
+
     public DatabaseClient getDatabaseClient() {
         return databaseClient;
     }
@@ -83,6 +97,10 @@ public class DeviceZServerApplication extends AbstractApplication {
 
     public TaskRegistry getTaskRegistry() {
         return taskRegistry;
+    }
+
+    public UserRegistry getUserRegistry() {
+        return userRegistry;
     }
 
     public NetworkingServer getNetworkingServer() {

@@ -1,20 +1,21 @@
 package de.devicez.server.http;
 
+import de.devicez.server.DeviceZServerApplication;
 import io.javalin.Javalin;
-import io.javalin.http.HttpStatus;
-import io.javalin.http.servlet.JavalinServletContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class HTTPServer {
 
+    private final DeviceZServerApplication application;
     private final Javalin server;
 
-    public HTTPServer(final int port, final String apiKey) {
+    public HTTPServer(final DeviceZServerApplication application, final int port) {
+        this.application = application;
         this.server = Javalin.create().start(port);
 
         server.before(context -> {
-            final String transmittedApiKey = context.header("API-KEY");
+            /*final String transmittedApiKey = context.header("API-KEY");
             if (apiKey.equals(transmittedApiKey)) {
                 return;
             }
@@ -22,7 +23,7 @@ public class HTTPServer {
             // Intercept any unauthenticated requests
             context.status(HttpStatus.FORBIDDEN);
             JavalinServletContext servletContext = (JavalinServletContext) context;
-            servletContext.getTasks().clear();
+            servletContext.getTasks().clear();*/
         });
 
         registerRoutes();
@@ -31,7 +32,7 @@ public class HTTPServer {
     }
 
     private void registerRoutes() {
-        server.get("/", context -> context.result("It works!"));
+        server.get("/", context -> context.result(application.getGson().toJson(application.getInformation())));
         // TODO add routes
     }
 
