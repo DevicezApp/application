@@ -9,6 +9,7 @@ import de.devicez.server.database.DatabaseClient;
 import de.devicez.server.device.DeviceRegistry;
 import de.devicez.server.device.group.DeviceGroupRegistry;
 import de.devicez.server.http.HTTPServer;
+import de.devicez.server.mail.MailService;
 import de.devicez.server.networking.NetworkingServer;
 import de.devicez.server.task.TaskRegistry;
 import de.devicez.server.user.UserRegistry;
@@ -27,6 +28,7 @@ public class DeviceZServerApplication extends AbstractApplication {
     private DatabaseClient databaseClient;
     private DeviceRegistry deviceRegistry;
     private DeviceGroupRegistry deviceGroupRegistry;
+    private MailService mailService;
     private TaskRegistry taskRegistry;
     private UserRegistry userRegistry;
     private NetworkingServer networkingServer;
@@ -54,6 +56,8 @@ public class DeviceZServerApplication extends AbstractApplication {
 
         deviceRegistry = new DeviceRegistry(this);
         deviceGroupRegistry = new DeviceGroupRegistry(this);
+
+        mailService = new MailService(this);
 
         taskRegistry = new TaskRegistry(this);
         userRegistry = new UserRegistry(this);
@@ -93,6 +97,10 @@ public class DeviceZServerApplication extends AbstractApplication {
 
     public DeviceGroupRegistry getDeviceGroupRegistry() {
         return deviceGroupRegistry;
+    }
+
+    public MailService getMailService() {
+        return mailService;
     }
 
     public TaskRegistry getTaskRegistry() {

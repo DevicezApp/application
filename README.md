@@ -45,3 +45,5 @@ here:
 - [Javalin](https://github.com/javalin/javalin) – A lightweight and easy-to-use HTTP server, perfect for REST-APIs
 - [cron-utils](https://github.com/jmrozanec/cron-utils) - A simple utility for parsing crontab expressions
 - [bcrypt](https://github.com/patrickfav/bcrypt) - A utility for hashing password using BCrypt algorithm
+- [jsoup](https://github.com/jhy/jsoup) - An awesome HTML parser
+- [Simple Java Mail](https://github.com/bbottema/simple-java-mail) - Just simply the best way to send mails
