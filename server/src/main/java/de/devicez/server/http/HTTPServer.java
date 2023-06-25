@@ -2,7 +2,7 @@ package de.devicez.server.http;
 
 import de.devicez.server.DeviceZServerApplication;
 import de.devicez.server.user.User;
-import de.devicez.server.user.controller.AuthController;
+import de.devicez.server.http.controller.AuthController;
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.servlet.JavalinServletContext;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @Slf4j
 public class HTTPServer {
 
-    private static final List<String> UNAUTHENTICATED_ROUTES = Arrays.asList("/", "/login", "/register");
+    private static final List<String> UNPROTECTED_ROUTES = Arrays.asList("/", "/login", "/register");
 
     private final DeviceZServerApplication application;
     private final Javalin server;
@@ -30,7 +30,8 @@ public class HTTPServer {
         }).start(port);
 
         server.before(context -> {
-            if (UNAUTHENTICATED_ROUTES.contains(context.path())) {
+            // If route is not protected -> let them pass
+            if (UNPROTECTED_ROUTES.contains(context.path())) {
                 return;
             }
 
@@ -42,6 +43,8 @@ public class HTTPServer {
 
                     final User user = application.getUserRegistry().getUserBySessionToken(token);
                     if (user != null && !user.isSessionExpired()) {
+                        // If user was found by session -> reset expiration timer
+                        user.extendSession();
                         return;
                     }
                 } catch (final IllegalArgumentException ignored) {
@@ -59,7 +62,7 @@ public class HTTPServer {
     }
 
     private void registerRoutes() {
-        server.get("/", context -> context.result(application.getGson().toJson(application.getInformation())));
+        server.get("/", context -> context.json(application.getInformation()));
 
         new AuthController(application, server);
     }

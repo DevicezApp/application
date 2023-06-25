@@ -1,4 +1,4 @@
-package de.devicez.server.user.controller;
+package de.devicez.server.http.controller;
 
 import de.devicez.server.DeviceZServerApplication;
 import de.devicez.server.user.User;
