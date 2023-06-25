@@ -52,7 +52,7 @@ public class AuthController extends AbstractController {
             context.json(new SuccessResponse());
         });
 
-        javalin.addHandler(HandlerType.POST, "/users", context -> {
+        javalin.addHandler(HandlerType.GET, "/users", context -> {
             context.json(new UserListResponse(getApplication().getUserRegistry().getUsers().stream().map(UserModel::convert).collect(Collectors.toSet())));
         });
     }

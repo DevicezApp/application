@@ -1,6 +1,7 @@
 package de.devicez.server.http;
 
 import de.devicez.server.DeviceZServerApplication;
+import de.devicez.server.http.controller.DeviceController;
 import de.devicez.server.user.User;
 import de.devicez.server.http.controller.AuthController;
 import io.javalin.Javalin;
@@ -65,6 +66,7 @@ public class HTTPServer {
         server.get("/", context -> context.json(application.getInformation()));
 
         new AuthController(application, server);
+        new DeviceController(application, server);
     }
 
     public void close() {
