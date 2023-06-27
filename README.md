@@ -1,3 +1,5 @@
+> **This project is currently in a "very early alpha development" state. _Do not use in a production environment!_**
+
 # DeviceZ application
 
 <img src="https://devicez.de/assets/img/logo.png" width=20% height=20% alt="DeviceZ Logo">
@@ -24,17 +26,21 @@ businesses. Besides costs, many of those tools require a permanent internet conn
 
 ## Current state
 
-Due to the fact I'm a *pretty bad* web developer, I'm currently limited to a console-only user interface. In the way I'd
-like to use this software, this is currently sufficient. **If you're a web developer with spare time on your hands, feel
-free to contact me!**
+What's it capable of?
 
-Besides questions of user interface, I'd like to achieve the following as a first milestone:
+- starting / restarting / stopping machines
+- grouping devices
+- schedule actions using crontab expressions
 
-- ~~starting / restarting / stopping machines remotely~~
-    - starting machines remotely would obviously be achieved via wake-on-lan. In a perfect world, the software would
-      utilize other running clients in the same network to startup clients unreachable from the servers network
-- ~~task scheduler allowing actions to be triggered automatically~~
-- run server-side predefined scripts on machines remotely (e. g. windows updates)
+What are the next milestones?
+
+- remote script execution (e. g. windows updates)
+
+There are efforts to create a *decent* web interface ([here](https://github.com/DevicezApp/webapp)) for this application. 
+Due to the fact that I'm a *pretty bad* web developer, I'd really appreciate some help here!
+Although a web-interface is present, the possibility of controlling the application via CLI will always be maintained. 
+
+**If you're a web developer with spare time on your hands, feel free to contact me!**
 
 ## Kudos
 
