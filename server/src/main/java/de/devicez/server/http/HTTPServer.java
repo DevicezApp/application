@@ -5,10 +5,10 @@ import de.devicez.server.http.controller.DeviceController;
 import de.devicez.server.user.User;
 import de.devicez.server.http.controller.AuthController;
 import io.javalin.Javalin;
+import io.javalin.http.HandlerType;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.servlet.JavalinServletContext;
 import io.javalin.json.JavalinGson;
-import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -18,7 +18,8 @@ import java.util.UUID;
 @Slf4j
 public class HTTPServer {
 
-    private static final List<String> UNPROTECTED_ROUTES = Arrays.asList("/", "/login", "/register");
+    public static final String USER_ATTRIBUTE = "user";
+    private static final List<String> UNPROTECTED_ROUTES = Arrays.asList("/", "/login", "/register", "/confirm");
 
     private final DeviceZServerApplication application;
     private final Javalin server;
@@ -26,7 +27,12 @@ public class HTTPServer {
     public HTTPServer(final DeviceZServerApplication application, final int port) {
         this.application = application;
         this.server = Javalin.create(config -> {
-            config.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost));
+            config.plugins.enableDevLogging();
+            config.plugins.enableCors(cors -> cors.add(it -> {
+                it.anyHost();
+                it.allowCredentials = true;
+                it.exposeHeader("Authorization");
+            }));
             config.jsonMapper(new JavalinGson(application.getGson()));
         }).start(port);
 
@@ -44,6 +50,8 @@ public class HTTPServer {
 
                     final User user = application.getUserRegistry().getUserBySessionToken(token);
                     if (user != null && !user.isSessionExpired()) {
+                        context.attribute(USER_ATTRIBUTE, user);
+
                         // If user was found by session -> reset expiration timer
                         user.extendSession();
                         return;
@@ -53,7 +61,10 @@ public class HTTPServer {
             }
 
             // Intercept any unauthenticated requests
-            context.status(HttpStatus.FORBIDDEN);
+            if (context.method() != HandlerType.OPTIONS) {
+                context.status(HttpStatus.UNAUTHORIZED);
+            }
+
             JavalinServletContext servletContext = (JavalinServletContext) context;
             servletContext.getTasks().clear();
         });

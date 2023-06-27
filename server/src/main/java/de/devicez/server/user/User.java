@@ -103,13 +103,24 @@ public class User extends AbstractDatabaseSerializable {
         getApplication().getUserRegistry().deleteUser(this);
     }
 
+    public void save() {
+        getApplication().getDatabaseClient().save(this);
+    }
+
     public boolean login(final String password) {
         final BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), passwordHash);
-        if (!result.verified) return false;
+        if (!result.verified) {
+            log.warn("Login for '{}' failed: invalid credentials", email);
+            return false;
+        }
+
+        lastLogin = new Timestamp(System.currentTimeMillis());
+        save();
 
         sessionToken = UUID.randomUUID();
         extendSession();
 
+        log.info("User '{}' successfully logged-in", email);
         return true;
     }
 
@@ -139,6 +150,11 @@ public class User extends AbstractDatabaseSerializable {
 
     public boolean isActive() {
         return active;
+    }
+
+    public void setActive(final boolean active) {
+        this.active = active;
+        save();
     }
 
     public UUID getSessionToken() {

@@ -2,7 +2,6 @@ package de.devicez.server.user;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import de.devicez.server.DeviceZServerApplication;
-import de.devicez.server.task.Task;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
