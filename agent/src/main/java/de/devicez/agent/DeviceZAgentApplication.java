@@ -2,8 +2,9 @@ package de.devicez.agent;
 
 import de.devicez.agent.installer.AgentInstaller;
 import de.devicez.agent.networking.NetworkingClient;
+import de.devicez.agent.platform.AbstractPlatform;
 import de.devicez.agent.updater.AgentUpdater;
-import de.devicez.agent.util.PlatformUtil;
+import de.devicez.agent.platform.PlatformUtil;
 import de.devicez.common.application.AbstractApplication;
 import de.devicez.common.application.Platform;
 import de.devicez.common.application.config.ApplicationConfig;
@@ -23,7 +24,8 @@ public class DeviceZAgentApplication extends AbstractApplication {
     private ApplicationConfig config;
     private NetworkingClient networkingClient;
 
-    private Platform platform;
+    private Platform platformType;
+    private AbstractPlatform platform;
     private File applicationFolder;
 
     private String hostname;
@@ -32,16 +34,17 @@ public class DeviceZAgentApplication extends AbstractApplication {
     @Override
     public void startup() throws Exception {
         try {
-            platform = PlatformUtil.determinePlatform();
+            platformType = PlatformUtil.determinePlatform();
+            platform = PlatformUtil.createInstance(this);
 
-            final Path applicationFolderPath = PlatformUtil.getApplicationFolder();
+            final Path applicationFolderPath = platform.getApplicationFolder();
             applicationFolder = applicationFolderPath.toFile();
 
             if (!applicationFolder.exists()) {
                 Files.createDirectories(applicationFolderPath);
             }
 
-            hostname = PlatformUtil.getHostname();
+            hostname = platform.getHostname();
         } catch (final IllegalStateException e) {
             log.error("Error while initializing platform dependant variables", e);
             System.exit(1);
@@ -68,7 +71,7 @@ public class DeviceZAgentApplication extends AbstractApplication {
         }
 
         // Only allow non daemon user after installation if in development
-        if (!PlatformUtil.isDaemonUser() && !config.getBooleanOrDefault("dev", false)) {
+        if (!platform.isDaemonUser() && !config.getBooleanOrDefault("dev", false)) {
             throw new IllegalStateException("not a daemon user");
         }
 
@@ -97,7 +100,7 @@ public class DeviceZAgentApplication extends AbstractApplication {
         final int serverPort = config.getIntOrDefault("port", 1337);
         log.info("DeviceZ Agent - v" + CURRENT_VERSION);
         log.info("I am {} with client id {}", hostname, clientId);
-        log.info("Running as user: {}", PlatformUtil.getUsername());
+        log.info("Running as user: {}", platform.getUsername());
 
         networkingClient = new NetworkingClient(this, serverHostname, serverPort);
     }
@@ -113,7 +116,11 @@ public class DeviceZAgentApplication extends AbstractApplication {
         return config;
     }
 
-    public Platform getPlatform() {
+    public Platform getPlatformType() {
+        return platformType;
+    }
+
+    public AbstractPlatform getPlatform() {
         return platform;
     }
 

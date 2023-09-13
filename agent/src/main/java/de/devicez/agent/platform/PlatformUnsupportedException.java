@@ -1,4 +1,4 @@
-package de.devicez.agent.util;
+package de.devicez.agent.platform;
 
 public class PlatformUnsupportedException extends RuntimeException {
 

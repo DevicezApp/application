@@ -33,11 +33,11 @@ public class ClientStreamHandler extends AbstractStreamHandler {
     }
 
     @Override
-    public void event(SessionEvent event) {
+    public void event(final SessionEvent event) {
         if (event == SessionEvent.READY) {
             try {
                 getSession().writenf(new LoginPacket(client.getApplication().getClientId(), client.getApplication().getHostname(),
-                        client.getApplication().getPlatform(), NetworkUtil.getHardwareAddress()));
+                        client.getApplication().getPlatformType(), NetworkUtil.getHardwareAddress()));
             } catch (final IOException e) {
                 log.error("Error while sending LoginPacket", e);
             }

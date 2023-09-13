@@ -59,13 +59,8 @@ public class AgentUpdater {
         } catch (final IOException ignored) {
         }
 
-        // Platform specific update
-        switch (application.getPlatform()) {
-            case WINDOWS ->
-                    new ProcessBuilder("cmd", "/c", "DeviceZService.exe", "restart").directory(application.getApplicationFolder()).start();
-            case LINUX ->
-                    new ProcessBuilder("systemctl", "restart", "devicez").directory(application.getApplicationFolder()).start();
-        }
+        // Restart daemon
+        application.getPlatform().restartAgent();
     }
 
     public static void finishUpdate(final DeviceZAgentApplication application) throws IOException, URISyntaxException {

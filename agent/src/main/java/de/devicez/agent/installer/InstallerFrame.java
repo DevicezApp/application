@@ -9,10 +9,9 @@ import java.awt.*;
 @Slf4j
 public class InstallerFrame extends JFrame {
 
+    private final JTextField hostname;
+    private final JTextField port;
     private DataCallback callback;
-    private JTextField hostname;
-    private JTextField port;
-    private JButton install;
 
     public InstallerFrame() throws HeadlessException {
         setTitle("DeviceZ – Installer");
@@ -41,7 +40,7 @@ public class InstallerFrame extends JFrame {
         labels.add(new JLabel("Port: "));
         inputs.add(port);
 
-        install = new JButton("Install");
+        final JButton install = new JButton("Install");
         panel.add(install, BorderLayout.SOUTH);
 
         install.addActionListener(e -> {

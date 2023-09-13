@@ -9,7 +9,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,51 +95,7 @@ public class AgentInstaller {
         final Path targetPath = new File(application.getApplicationFolder(), "DeviceZAgent.jar").toPath();
         Files.copy(executable.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-
-        // Platform specific installation
-        switch (application.getPlatform()) {
-            case WINDOWS -> {
-                // Copy WinSW executable
-                try (final InputStream inputStream = AgentInstaller.class.getResource("/windows/DeviceZService.exe").openStream()) {
-                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.exe").toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-
-                // Copy WinSW configuration
-                try (final InputStream inputStream = AgentInstaller.class.getResource("/windows/DeviceZService.xml").openStream()) {
-                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZService.xml").toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-
-                // Copy run script
-                try (final InputStream inputStream = AgentInstaller.class.getResource("/windows/DeviceZAgent.bat").openStream()) {
-                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZAgent.bat").toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-
-                // Register service
-                final Process installProcess = new ProcessBuilder("cmd", "/c", "DeviceZService.exe", "install").directory(application.getApplicationFolder()).start();
-                installProcess.waitFor();
-
-                // Run service
-                new ProcessBuilder("cmd", "/c", "DeviceZService.exe", "start").directory(application.getApplicationFolder()).start();
-            }
-            case LINUX -> {
-                // Copy service
-                try (final InputStream inputStream = AgentInstaller.class.getResource("/linux/devicez.service").openStream()) {
-                    Files.copy(inputStream, new File("/etc/systemd/system/devicez.service").toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-
-                // Copy run script
-                try (final InputStream inputStream = AgentInstaller.class.getResource("/linux/DeviceZAgent.sh").openStream()) {
-                    Files.copy(inputStream, new File(application.getApplicationFolder(), "DeviceZAgent.sh").toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-
-                final Process reloadProcess = new ProcessBuilder("systemctl", "daemon-reload").directory(application.getApplicationFolder()).start();
-                reloadProcess.waitFor();
-
-                final Process enableProcess = new ProcessBuilder("systemctl", "enable", "devicez").directory(application.getApplicationFolder()).start();
-                enableProcess.waitFor();
-
-                new ProcessBuilder("systemctl", "start", "devicez").directory(application.getApplicationFolder()).start();
-            }
-        }
+        application.getPlatform().installAgent();
+        application.getPlatform().startAgent();
     }
 }
