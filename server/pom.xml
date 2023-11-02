@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.simplejavamail</groupId>
             <artifactId>core-module</artifactId>
-            <version>8.2.0</version>
+            <version>8.3.1</version>
         </dependency>
     </dependencies>
 
